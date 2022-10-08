@@ -8,6 +8,7 @@ class Game(models.Model):
         ON = 'ON', _('Game is on')
         OFF = 'OFF', _('Game is off')
 
+    name = models.CharField('Имя', max_length=255)
     users_in_team_lim = models.PositiveSmallIntegerField(
         'Предел человек в команде',
         default=0
@@ -24,4 +25,7 @@ class Question(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     text = models.TextField('Текст вопроса')
     order = models.PositiveSmallIntegerField()
-    correct_answers = models.JSONField('Правильные ответы на вопрос', default={})
+    correct_answers = models.JSONField('Правильные ответы на вопрос', default=dict)
+
+    class Meta:
+        ordering = ('order',)
