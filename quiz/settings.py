@@ -15,6 +15,12 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080'
 ]
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
+
 
 SECRET_KEY = 'django-insecure-6(=f-thd_$bey2m&95&coedr)#==j0q&-!hi7@n8y5q1uco$+h'
 
@@ -24,6 +30,7 @@ ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS = [
+    'channels',
     'rest_framework',
     'corsheaders',
 
@@ -70,6 +77,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'quiz.wsgi.application'
+ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
     'default': {

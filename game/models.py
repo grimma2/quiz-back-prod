@@ -24,8 +24,8 @@ class Game(models.Model):
 class Question(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     text = models.TextField('Текст вопроса')
-    order = models.PositiveSmallIntegerField()
-    correct_answers = models.JSONField('Правильные ответы на вопрос', default=dict)
+    order = models.PositiveSmallIntegerField(default=1)
+    correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)
 
     class Meta:
         ordering = ('order',)

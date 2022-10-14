@@ -7,4 +7,4 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        exclude = ('game',)
+        fields = ('name', 'code', 'pk')
