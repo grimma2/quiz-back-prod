@@ -4,6 +4,8 @@ from datetime import time as datetime_time
 
 from django.db.models import Model, QuerySet
 
+from .models import Game
+
 
 def parse_time_field(time: str):
     hours, minutes, seconds = map(int, time.split(':'))
@@ -65,3 +67,7 @@ class ForeignKeyUpdater:
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]
             update_fields.pop('pk')
             QuerySet(remain).update(**update_fields)
+
+
+def get_leader_board(game: Game) -> dict:
+    return {'teams': [{'name': 'new one command'}]}

@@ -7,7 +7,9 @@ from team.models import Team
 
 from .serializers import GamesSerializer, GameDetailSerializer
 from .models import Game, Question
-from .utils import update_foreign_key, update_non_foreign_key, parse_non_foreign_key
+from .utils import (
+    update_foreign_key, update_non_foreign_key, parse_non_foreign_key, get_leader_board
+)
 
 
 class Games(APIView):
@@ -72,3 +74,11 @@ class UpdateGame(APIView):
         update_foreign_key(Team, game, request.data['team_set'], game.first().team_set)
 
         return Response(data={'pk': game.first().pk}, status=200)
+
+
+class LeaderBoard(APIView):
+
+    @staticmethod
+    def post(request):
+        team = Team.objects.filter(code=request.data['code']).select_related('game')
+        return Response(data=get_leader_board(team.first().game))

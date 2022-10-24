@@ -26,6 +26,3 @@ class Question(models.Model):
     text = models.TextField('Текст вопроса')
     order = models.PositiveSmallIntegerField(default=1)
     correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)
-
-    class Meta:
-        ordering = ('order',)

@@ -15,14 +15,22 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8080'
 ]
 
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [('localhost', 8000), ('127.0.0.1', 8000)],
+#         },
+#     },
+# }
+
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
 }
 
-
-SECRET_KEY = 'django-insecure-6(=f-thd_$bey2m&95&coedr)#==j0q&-!hi7@n8y5q1uco$+h'
+SECRET_KEY = 'django-secret-token'
 
 DEBUG = True
 
@@ -42,7 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'game.apps.GameConfig',
-    'team.apps.TeamConfig'
+    'team.apps.TeamConfig',
+    'quichannels.apps.QuichannelsConfig'
 ]
 
 MIDDLEWARE = [
