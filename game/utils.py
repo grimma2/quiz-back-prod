@@ -33,7 +33,7 @@ def update_foreign_key(model, game, field: list[dict], game_manager):
         else:
             converted_pks.append(instance)
 
-    updater = ForeignKeyUpdater(model, game, game_manager)
+    updater = ForeignKeyUpdater(model=model, game=game, game_manager=game_manager)
     # WARNING! Is necessarily call 'update_instances' before 'create_instances'
     # because 'update_instances' entirely override model field
     updater.update_instances(converted_pks)
@@ -46,7 +46,7 @@ def update_non_foreign_key(fields: dict, instance: QuerySet):
     instance.update(**parse_non_foreign_key(fields))
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ForeignKeyUpdater:
     model: Model
     game: QuerySet

@@ -1,12 +1,32 @@
+import logging
+from datetime import datetime, date, timedelta, tzinfo
+from dataclasses import dataclass
+
 from django.db.models import QuerySet
-from django.forms import model_to_dict
 
 from game.models import Game
 from game.utils import get_leader_board
+from game.serializers import QuestionSerializer
 
 from .models import Team, CodeGenerator
 
-from dataclasses import dataclass
+
+ZERO = timedelta(0)
+
+
+class UTC(tzinfo):
+
+    def utcoffset(self, dt):
+        return ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return ZERO
+
+
+utc = UTC()
 
 
 def update_team_codes(game: Game) -> QuerySet:
@@ -40,17 +60,26 @@ class TeamDataParser:
         active_question = get_team_question(self.team.active_question, questions)
 
         if active_question:
-            return {'active_question': model_to_dict(active_question)}
+            logging.getLogger('DL').info('get active question with timer')
+            return {
+                'active_question': QuestionSerializer(active_question).data,
+                'timer': self._get_timer_value()
+            }
         else:
             return {'leader_board': get_leader_board(self.game)}
 
+    def _get_timer_value(self):
+        ques_time = datetime.combine(date.min, self.game.question_time) - datetime.min
+        time_passed = datetime.now(utc) - self.team.timer.start_time
+        timer_value = ques_time - time_passed
+
+        return int(timer_value.total_seconds())
+
 
 def get_team_question(active_question_number: int, questions: QuerySet):
-    print(active_question_number)
     try:
         question = questions[active_question_number]
     except IndexError:
-        print('indexerror')
         pass
     else:
         return question

@@ -10,5 +10,6 @@ urlpatterns = [
     path('delete-detail/', views.DeleteGameDetail.as_view()),
     path('create/', views.CreateGame.as_view()),
     path('update/', views.UpdateGame.as_view()),
-    path('get-leader-board/', views.LeaderBoard.as_view())
+    path('get/leader-board/', views.LeaderBoard.as_view()),
+    path('get/question-time/', views.QuestionTime.as_view()),
 ]

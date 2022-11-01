@@ -4,7 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from quiz.settings import SECRET_KEY
 
 from .utils import (
-    code_is_valid, change_game_state, TeamConsumerMixin, GroupMessageSender, UpdateLeaderBoardEvent
+    code_is_valid, change_game_state, NextQuestionSender, GroupMessageSender, UpdateLeaderBoardEvent
 )
 
 from team.models import Team
@@ -14,7 +14,7 @@ from game.models import Game
 import json
 
 
-class TeamConsumer(TeamConsumerMixin, UpdateLeaderBoardEvent, WebsocketConsumer):
+class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer):
 
     def connect(self):
         self.code = self.scope['url_route']['kwargs']['code']
@@ -40,7 +40,7 @@ class TeamConsumer(TeamConsumerMixin, UpdateLeaderBoardEvent, WebsocketConsumer)
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         if text_data_json['type'] == 'next_question':
-            self.send_to_next_question()
+            self.send_to_next_question(self.team)
 
     def next_question(self, event):
         self.send(text_data=json.dumps({
@@ -85,3 +85,25 @@ class GameConsumer(GroupMessageSender, UpdateLeaderBoardEvent, WebsocketConsumer
         change_game_state(self.game.first(), state)
 
         self.send_to_all(self.game.first(), {'type': 'change_state', 'game_state': state})
+
+
+class TimerConsumer(NextQuestionSender, WebsocketConsumer):
+
+    def connect(self):
+        secret_key = self.scope['url_route']['kwargs']['secret_key']
+        print('connect...')
+        if not secret_key == SECRET_KEY:
+            return
+        self.accept()
+
+    def receive(self, text_data):
+        print(f'{text_data=}')
+        team = Team.objects.get(code=text_data)
+        print(f'{team=}')
+        try:
+            self.send_to_next_question(team)
+        except Exception as e:
+            print(e)
+        print('question was send')
+
+        self.close()

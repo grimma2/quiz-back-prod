@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 from django.db.models import QuerySet
 
 from rest_framework.views import APIView
@@ -82,3 +84,14 @@ class LeaderBoard(APIView):
     def post(request):
         team = Team.objects.filter(code=request.data['code']).select_related('game')
         return Response(data=get_leader_board(team.first().game))
+
+
+class QuestionTime(APIView):
+
+    @staticmethod
+    def post(request):
+        game = (
+            Team.objects.filter(code=request.data['code']).prefetch_related('game').first().game
+        )
+        time = datetime.combine(date.min, game.question_time) - datetime.min
+        return Response(data={'time': int(time.total_seconds())})
