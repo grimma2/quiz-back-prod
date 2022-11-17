@@ -55,3 +55,4 @@ websockets==10.4
 whitenoise==6.2.0
 wrapt==1.14.1
 zope.interface==5.5.1
+wheel==0.38.4
