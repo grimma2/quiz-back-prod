@@ -1,5 +1,8 @@
 from pathlib import Path
 import logging
+import os
+
+import dj_database_url
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,7 +17,7 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler(filename='log.log'))
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080'
+    'quiz-back-prod-production.up.railway.app'
 ]
 
 # CHANNEL_LAYERS = {
@@ -32,11 +35,13 @@ CHANNEL_LAYERS = {
     },
 }
 
-SECRET_KEY = 'django-secret-token'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'quiz-back-prod-production.up.railway.app'
+]
 
 
 INSTALLED_APPS = [
@@ -91,12 +96,10 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATA_BASE_URL'),
+    )
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -125,16 +128,18 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = '/collectedstatic/'
-STATIC_ROOT = BASE_DIR / STATIC_URL
-STATICFILES_DIRS = [BASE_DIR / '/static/']
+# STATIC_URL = '/collectedstatic/'
+# STATIC_ROOT = BASE_DIR / STATIC_URL
+# STATICFILES_DIRS = [BASE_DIR / '/static/']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = '6379'
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_USER = os.environ.get('REDIS_USER')
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
+CELERY_BROKER_URL = f'redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']
