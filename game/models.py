@@ -34,7 +34,7 @@ class Question(models.Model):
 
 class LeaderBoard(models.Model):
     game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True, related_name='leader_boards')
-    start_time = models.DateTimeField('Дата начала игры', auto_now_add=True)
+    start_time = models.DateTimeField('Дата начала игры')
     end_date = models.DateTimeField('Дата окончания игры', blank=True, null=True)
     already_end = models.BooleanField('Игра окончена', default=False)
 
