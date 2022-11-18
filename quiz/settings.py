@@ -7,6 +7,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECONDS_FOR_SINGLE_POINT = 1
 
 SYMBOLS_IN_TEAM_CODE = 5
 
