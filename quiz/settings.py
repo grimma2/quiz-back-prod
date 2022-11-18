@@ -17,7 +17,8 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler(filename='log.log'))
 
 CORS_ALLOWED_ORIGINS = [
-    'quiz-back-prod-production.up.railway.app'
+    'earnest-gnome-5d54fe.netlify.app',
+    'aquamarine-kashata-989ba9.netlify.app'
 ]
 
 # CHANNEL_LAYERS = {
@@ -37,11 +38,11 @@ CHANNEL_LAYERS = {
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
-    'quiz-back-prod-production.up.railway.app',
-    'earnest-gnome-5d54fe.netlify.app'
+    'earnest-gnome-5d54fe.netlify.app',
+    'aquamarine-kashata-989ba9.netlify.app'
 ]
 
 
@@ -98,7 +99,7 @@ ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATA_BASE_URL'),
+        default=os.environ.get('DATABASE_URL'),
     )
 }
 
@@ -138,9 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
-REDIS_USER = os.environ.get('REDIS_USER')
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
-CELERY_BROKER_URL = f'redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}'
+CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']
