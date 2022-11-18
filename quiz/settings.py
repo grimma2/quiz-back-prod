@@ -16,10 +16,6 @@ logger = logging.getLogger('DL')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler(filename='log.log'))
 
-CORS_ALLOWED_ORIGINS = [
-    'earnest-gnome-5d54fe.netlify.app',
-    'quiz-back-di7b.onrender.com'
-]
 
 # CHANNEL_LAYERS = {
 #     "default": {
@@ -45,11 +41,21 @@ ALLOWED_HOSTS = [
     'quiz-back-di7b.onrender.com'
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'https://earnest-gnome-5d54fe.netlify.app',
+    'https://quiz-back-di7b.onrender.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'earnest-gnome-5d54fe.netlify.app',
+    'quiz-back-di7b.onrender.com'
+]
+
 
 INSTALLED_APPS = [
     'channels',
-    'rest_framework',
     'corsheaders',
+    'rest_framework',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,9 +70,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
