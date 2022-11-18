@@ -1,11 +1,12 @@
 from pathlib import Path
 import logging
+import os
+
+import dj_database_url
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-SECONDS_FOR_SINGLE_POINT = 1
 
 SYMBOLS_IN_TEAM_CODE = 5
 
@@ -15,9 +16,6 @@ logger = logging.getLogger('DL')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler(filename='log.log'))
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080'
-]
 
 # CHANNEL_LAYERS = {
 #     "default": {
@@ -34,17 +32,30 @@ CHANNEL_LAYERS = {
     },
 }
 
-SECRET_KEY = 'django-secret-token'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'earnest-gnome-5d54fe.netlify.app',
+    'quiz-back-di7b.onrender.com'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'https://earnest-gnome-5d54fe.netlify.app',
+    'https://quiz-back-di7b.onrender.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'earnest-gnome-5d54fe.netlify.app',
+    'quiz-back-di7b.onrender.com'
+]
 
 
 INSTALLED_APPS = [
     'channels',
-    'rest_framework',
     'corsheaders',
+    'rest_framework',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,9 +70,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -93,12 +104,10 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+    )
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -134,9 +143,9 @@ STATICFILES_DIRS = [BASE_DIR / '/static/']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = '6379'
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
+CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']
