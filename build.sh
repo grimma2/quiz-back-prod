@@ -8,4 +8,5 @@ set -o errexit
 python -m ensurepip --default-pip
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser --email chella05andrey@gmail.com --noinput
+python manage.py createsuperuser --username anama --email chella05andrey@gmail.com --noinput
+celery -A quiz worker -l info
