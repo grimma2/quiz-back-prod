@@ -40,7 +40,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'quiz-back-prod-production.up.railway.app'
+    'quiz-back-prod-production.up.railway.app',
+    'earnest-gnome-5d54fe.netlify.app'
 ]
 
 
