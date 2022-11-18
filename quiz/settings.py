@@ -18,7 +18,7 @@ logger.addHandler(logging.FileHandler(filename='log.log'))
 
 CORS_ALLOWED_ORIGINS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'aquamarine-kashata-989ba9.netlify.app'
+    'quiz-back-di7b.onrender.com'
 ]
 
 # CHANNEL_LAYERS = {
@@ -42,7 +42,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'aquamarine-kashata-989ba9.netlify.app'
+    'quiz-back-di7b.onrender.com'
 ]
 
 
@@ -130,9 +130,9 @@ USE_L10N = True
 USE_TZ = True
 
 
-# STATIC_URL = '/collectedstatic/'
-# STATIC_ROOT = BASE_DIR / STATIC_URL
-# STATICFILES_DIRS = [BASE_DIR / '/static/']
+STATIC_URL = '/collectedstatic/'
+STATIC_ROOT = BASE_DIR / STATIC_URL
+STATICFILES_DIRS = [BASE_DIR / '/static/']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
