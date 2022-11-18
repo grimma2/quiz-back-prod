@@ -1,10 +1,10 @@
-import datetime
-
 from celery.contrib.abortable import AbortableAsyncResult
 from django.db import models, IntegrityError
+from django.utils import timezone
 
 from quiz.settings import SYMBOLS_IN_TEAM_CODE
 from quiz.celery import app as celery_app
+
 from quichannels.tasks import set_timer
 
 import random
@@ -27,12 +27,16 @@ class Timer(models.Model):
         max_length=99
     )
 
+    def delete(self, *args, **kwargs):
+        AbortableAsyncResult(self.task_id, app=celery_app).abort()
+        return super().delete(*args, **kwargs)
+
     def restart(self) -> None:
         old_task = AbortableAsyncResult(self.task_id, app=celery_app)
         old_task.abort()
         new_task = set_timer.apply_async(args=old_task.args)
 
-        self.start_time = datetime.datetime.now()
+        self.start_time = timezone.now()
         self.task_id = new_task.id
         self.save()
 
@@ -47,7 +51,10 @@ class Team(models.Model):
         unique=True
     )
     active_question = models.PositiveSmallIntegerField('Номер активного вопроса', default=0)
-    timer = models.OneToOneField(Timer, on_delete=models.SET_NULL, related_name='team', blank=True, null=True)
+    timer = models.OneToOneField(
+        Timer, on_delete=models.SET_NULL, related_name='team', blank=True, null=True
+    )
+    bonus_points = models.PositiveIntegerField('Баллы команды', default=0)
 
     def save(self, *args, **kwargs):
         while True:

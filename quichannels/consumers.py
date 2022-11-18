@@ -4,7 +4,8 @@ from channels.generic.websocket import WebsocketConsumer
 from quiz.settings import SECRET_KEY
 
 from .utils import (
-    code_is_valid, change_game_state, NextQuestionSender, GroupMessageSender, UpdateLeaderBoardEvent
+    code_is_valid, change_game_state, NextQuestionSender,
+    GroupMessageSender, UpdateLeaderBoardEvent, SecretKeyValidation
 )
 
 from team.models import Team
@@ -39,8 +40,12 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        self.team.refresh_from_db(fields=['timer'])
         if text_data_json['type'] == 'next_question':
-            self.send_to_next_question(self.team)
+            try:
+                self.send_to_next_question(self.team, text_data_json['bonus_points'])
+            except Exception as e:
+                print(e)
 
     def next_question(self, event):
         self.send(text_data=json.dumps({
@@ -51,20 +56,17 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
     def change_state(self, event):
         self.send(text_data=json.dumps({
             'event': 'change_state',
-            'event_data': event['game_state'],
+            'event_data': event['event_data'],
         }))
 
 
-class GameConsumer(GroupMessageSender, UpdateLeaderBoardEvent, WebsocketConsumer):
+class GameConsumer(SecretKeyValidation, UpdateLeaderBoardEvent, GroupMessageSender, WebsocketConsumer):
 
     def connect(self):
-        self.secret_key = self.scope['url_route']['kwargs']['secret_key']
+        self.validate_connect()
         game_pk = self.scope['url_route']['kwargs']['game_pk']
         self.game_name = f"{game_pk}_game"
         self.game = Game.objects.filter(pk=game_pk).prefetch_related('team_set')
-
-        if not self.secret_key == SECRET_KEY:
-            return
 
         async_to_sync(self.channel_layer.group_add)(
             self.game_name,
@@ -81,19 +83,25 @@ class GameConsumer(GroupMessageSender, UpdateLeaderBoardEvent, WebsocketConsumer
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        state = text_data_json['game_state']
-        change_game_state(self.game.first(), state)
 
-        self.send_to_all(self.game.first(), {'type': 'change_state', 'game_state': state})
+        if text_data_json['type'] == 'change_state':
+            change_game_state(self.game.first(), text_data_json['event_data'])
+            self.send_to_all(
+                self.game.first(),
+                {'type': 'change_state', 'event_data': text_data_json['event_data']}
+            )
+
+    def game_socket_change_state(self, event):
+        self.send(text_data=json.dumps({
+            'event': 'change_state',
+            'event_data': event['event_data'],
+        }))
 
 
-class TimerConsumer(NextQuestionSender, WebsocketConsumer):
+class TimerConsumer(SecretKeyValidation, UpdateLeaderBoardEvent, NextQuestionSender, WebsocketConsumer):
 
     def connect(self):
-        secret_key = self.scope['url_route']['kwargs']['secret_key']
-        print('connect...')
-        if not secret_key == SECRET_KEY:
-            return
+        self.validate_connect()
         self.accept()
 
     def receive(self, text_data):
@@ -107,3 +115,33 @@ class TimerConsumer(NextQuestionSender, WebsocketConsumer):
         print('question was send')
 
         self.close()
+
+
+class GameChangeState(SecretKeyValidation, WebsocketConsumer):
+
+    def connect(self):
+        print('dsfsghfjkl;hglfkdhss')
+        self.validate_connect()
+        self.accept()
+
+    def receive(self, text_data):
+        print('receive GameChangeState')
+        text_data_json = json.loads(text_data)
+        print(text_data_json)
+        try:
+            async_to_sync(self.channel_layer.group_send)(
+                f"{text_data_json['pk']}_game",
+                {
+                    'type': 'game_socket_change_state',
+                    'event_data': text_data_json['event_data']
+                }
+            )
+        except Exception as e:
+            print(e)
+        self.close()
+
+    def game_socket_change_state(self, event):
+        self.send(text_data=json.dumps({
+            'event': 'change_state',
+            'event_data': event['event_data'],
+        }))
