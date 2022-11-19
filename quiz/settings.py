@@ -4,6 +4,8 @@ import os
 
 import dj_database_url
 
+from .default_headers import DEFAULT_HEADERS
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,10 +44,21 @@ ALLOWED_HOSTS = [
     'quiz-back-di7b.onrender.com'
 ]
 
+# django-cors-headers
 CORS_ALLOWED_ORIGINS = [
     'https://musical-platypus-e75d6c.netlify.app',
     'https://quiz-back-di7b.onrender.com'
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    'https://musical-platypus-e75d6c.netlify.app',
+    'https://quiz-back-di7b.onrender.com'
+)
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = DEFAULT_HEADERS
+# end django-cors-headers
 
 CSRF_TRUSTED_ORIGINS = [
     'musical-platypus-e75d6c.netlify.app',
