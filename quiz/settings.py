@@ -45,25 +45,25 @@ ALLOWED_HOSTS = [
 ]
 
 # django-cors-headers
-CORS_ALLOWED_ORIGINS = [
-    'https://musical-platypus-e75d6c.netlify.app',
-    'https://quiz-back-di7b.onrender.com'
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'https://musical-platypus-e75d6c.netlify.app',
+#     'https://quiz-back-di7b.onrender.com'
+# ]
 
-CORS_ORIGIN_WHITELIST = (
-    'https://musical-platypus-e75d6c.netlify.app',
-    'https://quiz-back-di7b.onrender.com'
-)
+# CORS_ORIGIN_WHITELIST = (
+#     'https://musical-platypus-e75d6c.netlify.app',
+#     'https://quiz-back-di7b.onrender.com'
+# )
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_HEADERS = DEFAULT_HEADERS
+# CORS_ALLOW_HEADERS = DEFAULT_HEADERS
 # end django-cors-headers
 
-CSRF_TRUSTED_ORIGINS = [
-    'musical-platypus-e75d6c.netlify.app',
-    'quiz-back-di7b.onrender.com'
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     'musical-platypus-e75d6c.netlify.app',
+#     'quiz-back-di7b.onrender.com'
+# ]
 
 
 INSTALLED_APPS = [
