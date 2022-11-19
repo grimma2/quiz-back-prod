@@ -38,17 +38,17 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'earnest-gnome-5d54fe.netlify.app',
+    'musical-platypus-e75d6c.netlify.app',
     'quiz-back-di7b.onrender.com'
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://earnest-gnome-5d54fe.netlify.app',
+    'https://musical-platypus-e75d6c.netlify.app',
     'https://quiz-back-di7b.onrender.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'earnest-gnome-5d54fe.netlify.app',
+    'musical-platypus-e75d6c.netlify.app',
     'quiz-back-di7b.onrender.com'
 ]
 
