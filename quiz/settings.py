@@ -39,17 +39,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'quiz-back-di7b.onrender.com'
+    'quiz-back-prod.herokuapp.com'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'https://earnest-gnome-5d54fe.netlify.app',
-    'https://quiz-back-di7b.onrender.com'
+    'https://quiz-back-prod.herokuapp.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'quiz-back-di7b.onrender.com'
+    'quiz-back-prod.herokuapp.com'
 ]
 
 
@@ -105,9 +105,9 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
-    # 'default': dj_database_url.config(
-    #     default=os.environ.get('DATABASE_URL'),
-    # )
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
