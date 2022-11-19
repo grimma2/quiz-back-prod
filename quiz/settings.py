@@ -39,17 +39,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'quiz-back-prod.herokuapp.com'
+    'quiz-back-di7b.onrender.com'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'https://earnest-gnome-5d54fe.netlify.app',
-    'https://quiz-back-prod.herokuapp.com'
+    'https://quiz-back-di7b.onrender.com'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'earnest-gnome-5d54fe.netlify.app',
-    'quiz-back-prod.herokuapp.com'
+    'quiz-back-di7b.onrender.com'
 ]
 
 
