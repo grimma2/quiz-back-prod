@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
+from team.models import Team
+
 
 class Game(models.Model):
 
@@ -52,7 +54,7 @@ class LeaderBoard(models.Model):
 
 
 class FinishTeam(models.Model):
-    team = models.ForeignKey('team.Team', on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     leader_board = models.ForeignKey(LeaderBoard, on_delete=models.CASCADE)
     finish_date = models.DateTimeField(
         'Дата и время финиша команды', default=timezone.now

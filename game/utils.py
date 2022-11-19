@@ -5,8 +5,6 @@ from dataclasses import dataclass, field
 from typing import Any
 from datetime import time as datetime_time, timedelta
 
-import asyncio
-import websockets
 from django.db.models import Model, QuerySet
 
 from quiz.settings import SECRET_KEY, SECONDS_FOR_SINGLE_POINT
@@ -96,35 +94,6 @@ class ForeignKeyUpdater:
             self.model.objects.update_or_create(pk=remain.pk, defaults=deleter.work_object)
             deleter.recover()
             instances.remove(deleter.work_object)
-
-
-class WebsocketSenders:
-    HOST = 'localhost:8000'
-    LOOP = asyncio.get_event_loop()
-
-    @classmethod
-    def send_code(cls, code: str) -> None:
-
-        async def code_sender():
-            async with websockets.connect(f'ws://{cls.HOST}/timer/{SECRET_KEY}/') as websocket:
-                await websocket.send(code)
-                await websocket.recv()
-
-        cls.LOOP.run_until_complete(code_sender())
-
-    @classmethod
-    def send_state(cls, state, game_pk):
-        connection_url = f'ws://{cls.HOST}/game-change-state/{SECRET_KEY}/'
-
-        async def state_sender():
-            async with websockets.connect(connection_url) as websocket:
-                await websocket.send(json.dumps({
-                    'pk': game_pk,
-                    'event_data': state
-                }))
-                await websocket.recv()
-
-        cls.LOOP.run_until_complete(state_sender())
 
 
 class LeaderBoardFetcher:
