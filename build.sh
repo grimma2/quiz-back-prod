@@ -9,5 +9,5 @@ python -m ensurepip --default-pip
 pip install -r requirements.txt
 #python manage.py makemigrations
 #python manage.py migrate
-python manage.py createsuperuser --username anama2 --email chella05andrey@gmail.com --noinput
+#python manage.py createsuperuser --username anama2 --email chella05andrey@gmail.com --noinput
 #celery -A quiz worker -l info

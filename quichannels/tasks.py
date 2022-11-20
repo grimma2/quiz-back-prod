@@ -5,18 +5,18 @@ import time
 
 from celery.contrib.abortable import AbortableTask
 from quiz.celery import app
-from quiz.settings import SECRET_KEY
+from quiz.settings import ALLOWED_HOSTS
 
 
 class WebsocketSenders:
-    HOST = 'localhost:8000'
+    HOST = ALLOWED_HOSTS[1]
     LOOP = asyncio.get_event_loop()
 
     @classmethod
     def send_code(cls, code: str) -> None:
 
         async def code_sender():
-            async with websockets.connect(f'wss://{cls.HOST}/timer/{SECRET_KEY}/') as websocket:
+            async with websockets.connect(f'wss://{cls.HOST}/timer/') as websocket:
                 await websocket.send(code)
                 await websocket.recv()
 
@@ -24,7 +24,7 @@ class WebsocketSenders:
 
     @classmethod
     def send_state(cls, state, game_pk):
-        connection_url = f'ws://{cls.HOST}/game-change-state/{SECRET_KEY}/'
+        connection_url = f'wss://{cls.HOST}/game-change-state/'
 
         async def state_sender():
             async with websockets.connect(connection_url) as websocket:

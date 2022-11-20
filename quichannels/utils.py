@@ -163,10 +163,3 @@ class UpdateLeaderBoardEvent:
             'event': 'update_leader_board',
             'event_data': event['event_data'],
         }))
-
-
-class SecretKeyValidation:
-
-    def validate_connect(self):
-        if not self.scope['url_route']['kwargs']['secret_key'] == SECRET_KEY:
-            raise Exception('invalid SECRET_KEY')
