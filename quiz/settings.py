@@ -18,20 +18,20 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.FileHandler(filename='log.log'))
 
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [('localhost', 8000), ('127.0.0.1', 8000)],
-#         },
-#     },
-# }
-
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL')],
+        },
     },
 }
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     },
+# }
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
