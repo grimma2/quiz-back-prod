@@ -38,23 +38,18 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'musical-platypus-e75d6c.netlify.app',
+    'earnest-cassata-8f1bf8.netlify.app',
     'quiz-back-prod.herokuapp.com'
 ]
 
 # django-cors-headers
 
 CORS_ALLOWED_ORIGINS = [
-    'https://musical-platypus-e75d6c.netlify.app',
+    'https://earnest-cassata-8f1bf8.netlify.app',
     'https://quiz-back-prod.herokuapp.com'
 ]
 
 # end django-cors-headers
-
-# CSRF_TRUSTED_ORIGINS = [
-#     'musical-platypus-e75d6c.netlify.app',
-#     'quiz-back-di7b.onrender.com'
-# ]
 
 
 INSTALLED_APPS = [
