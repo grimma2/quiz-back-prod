@@ -39,12 +39,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'musical-platypus-e75d6c.netlify.app',
-    'quiz-back-di7b.onrender.com'
+    'quiz-back-prod.herokuapp.com'
 ]
 
 # django-cors-headers
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://musical-platypus-e75d6c.netlify.app',
+    'https://quiz-back-prod.herokuapp.com'
+]
 
 # end django-cors-headers
 
