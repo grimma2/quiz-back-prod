@@ -117,7 +117,7 @@ class NextQuestionSender(GroupMessageSender):
         team.active_question = F('active_question') + 1
         team.bonus_points = F('bonus_points') + bonus_points
         team.save()
-        team.refresh_from_db(fields=['active_question'])
+        team.refresh_from_db()
         questions = team.game.question_set.all()
 
         question = get_team_question(team.active_question, questions)
