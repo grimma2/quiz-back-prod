@@ -41,6 +41,7 @@ class LeaderBoard(models.Model):
     already_end = models.BooleanField('Игра окончена', default=False)
 
     def finish(self):
+        print('finish')
         self.end_date = timezone.now()
         self.already_end = True
 
@@ -51,6 +52,7 @@ class LeaderBoard(models.Model):
 
         self.save()
         self.refresh_from_db()
+        print(self.already_end)
 
 
 class FinishTeam(models.Model):

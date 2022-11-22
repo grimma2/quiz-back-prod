@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from typing import Any
 from datetime import time as datetime_time, timedelta
 
+import asyncio
+import websockets
 from django.db.models import Model, QuerySet
 
 from quiz.settings import SECRET_KEY, SECONDS_FOR_SINGLE_POINT
@@ -121,7 +123,7 @@ class LeaderBoardFetcher:
     def get_game_off(self) -> LeaderBoard:
         board = LeaderBoard.objects.filter(game=self.game).prefetch_related(
             'finishteam_set'
-        ).order_by('-end_date').last()
+        ).order_by('end_date').last()
         return board
 
     def parse(self):
