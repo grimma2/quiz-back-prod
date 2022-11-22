@@ -8,8 +8,6 @@ from django.db.models import F
 
 from .tasks import set_timer, send_state_to_consumer
 
-from quiz.settings import SECRET_KEY
-
 from team.models import Team, Timer
 from team.utils import get_team_question
 
@@ -38,7 +36,9 @@ def game_off_team_basics(game: Game, revoke_timers=True) -> None:
 
 
 def all_teams_finished(finished_team_question: int, game: Game) -> bool:
+    print(game.team_set.all())
     for team in game.team_set.all():
+        print(f'check code {team.active_question=}')
         if team.active_question != finished_team_question:
             break
     else:
@@ -52,8 +52,8 @@ def change_game_state(game: Game, state, revoke_timers=True) -> None:
     dependency = GameTimersDependency(game=game)
 
     if state == 'OFF':
-        game_off_team_basics(game, revoke_timers)
         LeaderBoardFetcher(game=game).board.finish()
+        game_off_team_basics(game, revoke_timers)
     else:
         LeaderBoard.objects.create(game=game)
         dependency.set_timers()
@@ -124,7 +124,10 @@ class NextQuestionSender(GroupMessageSender):
 
         if question:
             # set new timer if new question has begun
-            team.timer.restart()
+            team.timer.restart(
+                code=team.code,
+                question_time=team.game.question_time
+            )
             return QuestionSerializer(question).data
         else:
             # delete timer if question not run anymore

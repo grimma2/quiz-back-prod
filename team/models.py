@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 from celery.contrib.abortable import AbortableAsyncResult
 from django.db import models, IntegrityError
 from django.utils import timezone
@@ -31,10 +33,14 @@ class Timer(models.Model):
         AbortableAsyncResult(self.task_id, app=celery_app).abort()
         return super().delete(*args, **kwargs)
 
-    def restart(self) -> None:
-        old_task = AbortableAsyncResult(self.task_id, app=celery_app)
-        old_task.abort()
-        new_task = set_timer.apply_async(args=old_task.args)
+    def restart(self, code, question_time) -> None:
+        AbortableAsyncResult(self.task_id, app=celery_app).abort()
+        new_task = set_timer.apply_async(
+            args=[
+                (datetime.combine(date.min, question_time) - datetime.min).total_seconds(),
+                code
+            ]
+        )
 
         self.start_time = timezone.now()
         self.task_id = new_task.id
