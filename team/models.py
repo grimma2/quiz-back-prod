@@ -41,10 +41,9 @@ class Timer(models.Model):
                 code
             ]
         )
-
+        
         self.start_time = timezone.now()
         self.task_id = new_task.id
-        self.save()
 
 
 class Team(models.Model):
