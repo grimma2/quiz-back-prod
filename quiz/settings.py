@@ -27,12 +27,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels.layers.InMemoryChannelLayer",
-#     },
-# }
-
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = False
