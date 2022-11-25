@@ -2,6 +2,8 @@ from pathlib import Path
 import logging
 import os
 
+import dj_database_url
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,15 +32,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'earnest-cassata-8f1bf8.netlify.app', '127.0.0.1', 'quiz.org'
+    'earnest-cassata-8f1bf8.netlify.app',
+    'quiz-back-prod.herokuapp.com'
 ]
 
 # django-cors-headers
 
 CORS_ALLOWED_ORIGINS = [
     'https://earnest-cassata-8f1bf8.netlify.app',
-    'http://127.0.0.1:8000',
-    'http://quiz.org'
+    'https://quiz-back-prod.herokuapp.com'
 ]
 
 # end django-cors-headers
@@ -96,14 +98,9 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'quiz',
-        'USER': 'quizuser',
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': '5432'
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('HEROKU_POSTGRESQL_RED_URL')
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,9 +130,9 @@ USE_L10N = True
 USE_TZ = True
 
 
-# STATIC_URL = '/collectedstatic/'
-# STATIC_ROOT = BASE_DIR / STATIC_URL
-# STATICFILES_DIRS = [BASE_DIR / '/static/']
+STATIC_URL = '/collectedstatic/'
+STATIC_ROOT = BASE_DIR / STATIC_URL
+STATICFILES_DIRS = [BASE_DIR / '/static/']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
