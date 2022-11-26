@@ -135,6 +135,9 @@ class LeaderBoardFetcher:
         teams = []
 
         for finish_team in finish_teams:
+            if not finish_team.team:
+                continue
+
             if self.use_bonus_points:
                 finish_team_date = (
                     finish_team.finish_date - timedelta(seconds=finish_team.bonus_points * SECONDS_FOR_SINGLE_POINT)
