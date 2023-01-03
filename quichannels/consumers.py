@@ -1,9 +1,10 @@
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+from django.db.models import F
 
 from .utils import (
-    code_is_valid, change_game_state, NextQuestionSender,
-    GroupMessageSender, UpdateLeaderBoardEvent
+    change_game_state, NextQuestionSender,
+    GroupMessageSender, UpdateLeaderBoardEvent, code_is_valid
 )
 
 from team.models import Team
@@ -21,7 +22,7 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
             Team.objects.filter(code=self.code).select_related('game').prefetch_related('game__question_set').first()
         )
         self.team_name = f'{self.code}_team'
-        code_is_valid(self.team)
+        code_is_valid(self.team.code, self.code)
 
         async_to_sync(self.channel_layer.group_add)(
             self.team_name,
@@ -41,7 +42,39 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
         self.team.refresh_from_db(fields=['timer'])
         if text_data_json['type'] == 'next_question':
             try:
+                print(f"bonus: {text_data_json['bonus_points']}")
                 self.send_to_next_question(self.team, text_data_json['bonus_points'])
+            except Exception as e:
+                print(e)
+        elif text_data_json['type'] == 'decrement_remain_answers':
+            try:
+                self.team.refresh_from_db()
+                print('decrement_remain_answers')
+                print(self.team.remain_answers)
+                for i, answer in enumerate(self.team.remain_answers):
+                    if answer['text'] == text_data_json['answer_text']:
+                        del self.team.remain_answers[i]
+                    else:
+                        print(f"{answer['text']} !== {text_data_json['answer_text']}")
+
+                if self.team.remain_answers:
+                    print(f'{self.team.remain_answers=}')
+                    if text_data_json['bonus_points']:
+                        self.team.bonus_points = F('bonus_points') + text_data_json['bonus_points']
+                    self.team.save()
+
+                    async_to_sync(self.channel_layer.group_send)(
+                        self.team_name,
+                        {
+                            'type': 'send_remain_answers',
+                            'event_data': self.team.remain_answers
+                        }
+                    )
+
+                    print('after send_remain_answers to all')
+                else:
+                    print(f'{self.team.remain_answers} after')
+                    self.send_to_next_question(self.team, text_data_json['bonus_points'])
             except Exception as e:
                 print(e)
 
@@ -54,6 +87,18 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
     def change_state(self, event):
         self.send(text_data=json.dumps({
             'event': 'change_state',
+            'event_data': event['event_data'],
+        }))
+
+    def game_socket_change_state(self, event):
+        self.send(text_data=json.dumps({
+            'event': 'change_state',
+            'event_data': event['event_data'],
+        }))
+
+    def send_remain_answers(self, event):
+        self.send(text_data=json.dumps({
+            'event': 'decrement_remain_answers',
             'event_data': event['event_data'],
         }))
 
@@ -111,31 +156,3 @@ class TimerConsumer(UpdateLeaderBoardEvent, NextQuestionSender, WebsocketConsume
         print('question was send')
 
         self.close()
-
-
-class GameChangeState(WebsocketConsumer):
-
-    def connect(self):
-        self.accept()
-
-    def receive(self, text_data):
-        print('receive GameChangeState')
-        text_data_json = json.loads(text_data)
-        print(text_data_json)
-        try:
-            async_to_sync(self.channel_layer.group_send)(
-                f"{text_data_json['pk']}_game",
-                {
-                    'type': 'game_socket_change_state',
-                    'event_data': text_data_json['event_data']
-                }
-            )
-        except Exception as e:
-            print(e)
-        self.close()
-
-    def game_socket_change_state(self, event):
-        self.send(text_data=json.dumps({
-            'event': 'change_state',
-            'event_data': event['event_data'],
-        }))

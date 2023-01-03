@@ -27,6 +27,7 @@ class ActiveQuestion(APIView):
             Team.objects.filter(code=request.data['code']).select_related('game').prefetch_related('game__question_set')
         )
 
+        print(team.first().game.question_set.all())
         question = team.first().game.question_set.all()[team.first().active_question]
         serializer = QuestionSerializer(question)
 

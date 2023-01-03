@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 import logging
 from datetime import datetime, date
-from dataclasses import dataclass
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -44,10 +44,10 @@ class TeamDataParser:
         active_question = get_team_question(self.team.active_question, questions)
 
         if active_question:
-            logging.getLogger('DL').info('get active question with timer')
             return {
                 'active_question': QuestionSerializer(active_question).data,
-                'timer': self._get_timer_value()
+                'timer': self._get_timer_value(),
+                'remain_answers': self.team.remain_answers if active_question.question_type == 'blitz' else None
             }
         else:
             fetcher = LeaderBoardFetcher(game=self.game)
