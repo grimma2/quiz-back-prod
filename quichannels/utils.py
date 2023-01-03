@@ -1,12 +1,11 @@
 import json
-import logging
-from datetime import datetime, date
 from dataclasses import dataclass
+from datetime import datetime, date
 
 from asgiref.sync import async_to_sync
 from django.db.models import F
 
-from .tasks import set_timer, send_state_to_consumer
+from .tasks import set_timer
 
 from team.models import Team, Timer
 from team.utils import get_team_question
@@ -16,9 +15,14 @@ from game.serializers import QuestionSerializer
 from game.utils import LeaderBoardFetcher
 
 
-def code_is_valid(team: Team) -> None:
-    if not team:
-        raise Exception('Team with this code not found')
+def set_remain_answers(question, teams):
+    print(f'{question.correct_answers=}')
+    for team in teams:
+        team.remain_answers = question.correct_answers
+        team.save()
+        print(f'before refresh {team.remain_answers=}')
+        team.refresh_from_db()
+        print(f'after refresh {team.remain_answers=}')
 
 
 def game_off_team_basics(game: Game, revoke_timers=True) -> None:
@@ -36,9 +40,7 @@ def game_off_team_basics(game: Game, revoke_timers=True) -> None:
 
 
 def all_teams_finished(finished_team_question: int, game: Game) -> bool:
-    print(game.team_set.all())
     for team in game.team_set.all():
-        print(f'check code {team.active_question=}')
         if team.active_question != finished_team_question:
             break
     else:
@@ -46,17 +48,22 @@ def all_teams_finished(finished_team_question: int, game: Game) -> bool:
 
 
 def change_game_state(game: Game, state, revoke_timers=True) -> None:
-    print('change_game_state')
-    game.game_state = state
-    game.save()
-    dependency = GameTimersDependency(game=game)
 
     if state == 'OFF':
-        LeaderBoardFetcher(game=game).board.finish()
+        fetcher = LeaderBoardFetcher(game=game)
+        fetcher.board.finish()
         game_off_team_basics(game, revoke_timers)
     else:
+        if (blitz_question := game.question_set.first()).question_type == 'blitz':
+            set_remain_answers(blitz_question, game.team_set.all())
+        else:
+            print(blitz_question.question_type)
+        dependency = GameTimersDependency(game=game)
         LeaderBoard.objects.create(game=game)
         dependency.set_timers()
+
+    game.game_state = state
+    game.save()
 
 
 class GroupMessageSender:
@@ -76,20 +83,15 @@ class GameTimersDependency:
     game: Game
 
     def set_timers(self):
-        print('set_timers')
-        logging.getLogger('DL').info('set_timers...')
         ques_time = datetime.combine(date.min, self.game.question_time) - datetime.min
         for team in self.game.team_set.all():
-            print(f'{team.code=}')
             task = set_timer.apply_async(args=[ques_time.total_seconds(), team.code])
-            print(f'{task.state=}')
             team.timer = Timer.objects.create(task_id=task.id)
             team.save()
 
     def revoke_timers(self):
-        print('revoke_timers')
         for team in self.game.team_set.all():
-            print(f'{team.timer=}')
+            print(f'{team.timer}')
             if not team.timer:
                 return
 
@@ -114,15 +116,21 @@ class NextQuestionSender(GroupMessageSender):
         )
 
     def get_next_question(self, team: Team, bonus_points):
+        questions = team.game.question_set.all()
+        # clear remain_answers field for previous question if it is blitz type
+        self._clear_current_question(get_team_question(team.active_question, questions), team)
         team.active_question = F('active_question') + 1
         team.bonus_points = F('bonus_points') + bonus_points
         team.save()
         team.refresh_from_db()
-        questions = team.game.question_set.all()
 
         question = get_team_question(team.active_question, questions)
 
         if question:
+            if question.question_type == 'blitz':
+                team.remain_answers = question.correct_answers
+                team.save()
+
             # set new timer if new question has begun
             team.timer.restart(
                 code=team.code,
@@ -131,7 +139,6 @@ class NextQuestionSender(GroupMessageSender):
             return QuestionSerializer(question).data
         else:
             # delete timer if question not run anymore
-            print('delete timer')
             team.timer.delete()
 
             fetcher = LeaderBoardFetcher(game=team.game)
@@ -146,7 +153,15 @@ class NextQuestionSender(GroupMessageSender):
             print('all_teams_finished')
             # turn off game if all teams are finished
             change_game_state(team.game, state='OFF', revoke_timers=False)
-            send_state_to_consumer.apply_async(args=['OFF', team.game.pk])
+            print('before send')
+            async_to_sync(self.channel_layer.group_send)(
+                f'{team.game.pk}_game',
+                {
+                    'type': 'game_socket_change_state',
+                    'event_data': 'OFF'
+                }
+            )
+
             self.send_to_all(team.game, {'type': 'change_state', 'event_data': Game.GameState.OFF})
         else:
             parsed_data = fetcher.parse()
@@ -157,12 +172,22 @@ class NextQuestionSender(GroupMessageSender):
             )
             return parsed_data
 
+    @staticmethod
+    def _clear_current_question(question, team: Team):
+        if question.question_type == 'blitz':
+            print('_clear_current_question...')
+            team.remain_answers = None
+
 
 class UpdateLeaderBoardEvent:
 
     def update_leader_board(self, event):
-        print(event)
         self.send(text_data=json.dumps({
             'event': 'update_leader_board',
             'event_data': event['event_data'],
         }))
+
+
+def code_is_valid(team_code: str, received_code: str):
+    if team_code != received_code.strip():
+        raise Exception('received code is not valid')

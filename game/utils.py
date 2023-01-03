@@ -1,33 +1,30 @@
-import json
+from dataclasses import dataclass, field
 import logging
 from operator import itemgetter
-from dataclasses import dataclass, field
 from typing import Any
 from datetime import time as datetime_time, timedelta
 
-import asyncio
-import websockets
 from django.db.models import Model, QuerySet
 
-from quiz.settings import SECRET_KEY, SECONDS_FOR_SINGLE_POINT
+from quiz.settings import SECONDS_FOR_SINGLE_POINT
 from .models import Game, LeaderBoard
 
 
 def timedelta_to_str(time: timedelta):
     seconds = int(time.total_seconds())
-    print(f'{seconds=}')
+    print(f'{seconds}')
     # 3600 seconds = 1 hour
     hours = seconds // 3600
     minutes = seconds // 60 - hours * 60
     converted_seconds = seconds - (hours * 3600 + minutes * 60)
-    print(f'{minutes}:{converted_seconds}', f'{hours=}')
+    print(f'{minutes}:{converted_seconds}', f'{hours}')
 
     return f'{hours}:{minutes}:{converted_seconds}' if hours else f'{minutes}:{converted_seconds}'
 
 
 def parse_time_field(time: str):
-    hours, minutes, seconds = map(int, time.split(':'))
-    return datetime_time(minute=minutes, second=seconds, hour=hours)
+    minutes, seconds = map(int, time.split(':'))
+    return datetime_time(minute=minutes, second=seconds)
 
 
 def parse_non_foreign_key(fields: dict) -> dict:
@@ -71,7 +68,9 @@ class ForeignKeyUpdater:
     game_manager: Any
 
     def create_instances(self, instances: list[dict]) -> None:
+        print(instances)
         for instance in instances:
+            print('create instance... unconverted', instance)
             instance.pop('pk')
             self.model.objects.create(**instance, game=self.game)
 
@@ -83,7 +82,7 @@ class ForeignKeyUpdater:
             if not remain.pk in updated_pks:
                 logging.getLogger('DL').info(remain.delete())
                 continue
-
+            print('delete ramain in loop')
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]
 
             if self.model == Team:
@@ -163,7 +162,7 @@ class LeaderBoardFetcher:
 @dataclass(kw_only=True)
 class TemporaryDelete:
     work_object: dict
-    delete_fields: list[str]
+    delete_fields: dict
     deleted: dict = field(default_factory=dict)
 
     def delete(self):
