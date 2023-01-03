@@ -36,7 +36,11 @@ ALLOWED_HOSTS = [
     'quiz-back-prod.herokuapp.com'
 ]
 
+SESSION_COOKIE_SAMESITE = None
+CRSF_COOKIE_SAMESITE = None
+
 # django-cors-headers
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'https://earnest-cassata-8f1bf8.netlify.app',
@@ -48,8 +52,8 @@ CORS_ALLOWED_ORIGINS = [
 
 INSTALLED_APPS = [
     'channels',
-    'corsheaders',
     'rest_framework',
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,9 +68,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
