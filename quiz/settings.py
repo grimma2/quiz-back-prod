@@ -33,7 +33,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'earnest-cassata-8f1bf8.netlify.app',
-    'quiz-back-prod.herokuapp.com'
+    'quiz-game1.ru',
+    '127.0.0.1',
+    '62.113.104.181'
 ]
 
 SESSION_COOKIE_SAMESITE = None
@@ -44,7 +46,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     'https://earnest-cassata-8f1bf8.netlify.app',
-    'https://quiz-back-prod.herokuapp.com'
+    'https://quiz-game1.ru',
+    'http://127.0.0.1:8000',
+    'https://62.113.104.181'
 ]
 
 # end django-cors-headers
@@ -103,7 +107,7 @@ ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('HEROKU_POSTGRESQL_RED_URL')
+        default=os.environ.get('DATABASE_URL')
     )
 }
 
