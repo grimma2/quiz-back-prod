@@ -2,8 +2,6 @@ from pathlib import Path
 import logging
 import os
 
-import dj_database_url
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +25,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = 'fz@z7-a=yvq!rvy+0#f(laxf@@z6-jgjh2wk$!+ydea2jk@)xz'
 
 DEBUG = False
 
@@ -106,9 +104,14 @@ WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'quiz',
+        'USER': 'quizuser',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '5432'
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
