@@ -20,7 +20,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL')],
+            "hosts": ['rediss://red-cf4lr59gp3js6fk10ok0:s6t1AcvLM7q9KL1w46MiVnyLIiN2rLI6@singapore-redis.render.com:6379'],
         },
     },
 }
@@ -148,7 +148,7 @@ STATICFILES_DIRS = [BASE_DIR / '/static/']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CELERY_BROKER_URL = os.environ.get('REDIS_URL')
+CELERY_BROKER_URL = 'rediss://red-cf4lr59gp3js6fk10ok0:s6t1AcvLM7q9KL1w46MiVnyLIiN2rLI6@singapore-redis.render.com:6379'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']

@@ -98,13 +98,20 @@ class GetGamesCookie(APIView):
     @staticmethod
     def post(request):
         if 'gamesPks' in request.COOKIES:
+            print(f"have gamesPks: {request.COOKIES['gamesPks']}")
             response = Response(data=request.COOKIES['gamesPks'])
         else:
+            print('not have cookies')
+            print(f'scheme: {request.scheme}')
+            print(f'is secure: {request.is_secure()}')
+            print(
+                f"host: {request.get_host()}, http_host: {request.META['HTTP_HOST']}, REMOTE_HOST: {request.META['REMOTE_HOST']}"
+            )
+            print(f'cookies: {request.COOKIES}')
             response = Response(data='[]')
             response.set_cookie(
                 'gamesPks',
                 '[]',
-                secure=request.is_secure(),
                 httponly=True,
                 expires='Fri, 31 Dec 9999 23:59:59 GMT'
             )
@@ -117,10 +124,10 @@ class SetGamesCookie(APIView):
     @staticmethod
     def post(request):
         response = Response()
+        print(f"set games cookie: {request.data['gamesPk']}")
         response.set_cookie(
             'gamesPks',
             request.data['gamesPks'],
-            secure=request.is_secure(),
             httponly=True,
             expires='Fri, 31 Dec 9999 23:59:59 GMT'
         )
