@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-import logging
 from operator import itemgetter
 from typing import Any
 from datetime import time as datetime_time, timedelta
@@ -80,7 +79,6 @@ class ForeignKeyUpdater:
 
         for remain in self.game_manager.all():
             if not remain.pk in updated_pks:
-                logging.getLogger('DL').info(remain.delete())
                 continue
             print('delete ramain in loop')
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]

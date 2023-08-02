@@ -1,3 +1,5 @@
+from autologging import traced
+
 import json
 from dataclasses import dataclass
 from datetime import datetime, date
@@ -47,6 +49,7 @@ def all_teams_finished(finished_team_question: int, game: Game) -> bool:
         return True
 
 
+@traced
 def change_game_state(game: Game, state, revoke_timers=True) -> None:
 
     if state == 'OFF':

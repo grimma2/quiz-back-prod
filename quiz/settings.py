@@ -1,6 +1,14 @@
 from pathlib import Path
+from autologging import TRACE
 import logging
-import os
+import os, sys
+
+
+logging.basicConfig(
+    level=TRACE,
+    stream=sys.stdout,
+    format="%(levelname)s:%(name)s:%(funcName)s:%(message)s"
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,28 +17,35 @@ SECONDS_FOR_SINGLE_POINT = 1
 
 SYMBOLS_IN_TEAM_CODE = 5
 
-logging.basicConfig(level=logging.DEBUG, filename='log.log', filemode='w',
-                    format='%(asctime)s - logger:%(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('DL')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.FileHandler(filename='log.log'))
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+    ]
+}
 
 
+CHANNEL_REDIS = os.environ['CHANNEL_REDIS']
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": ['rediss://red-cf4lr59gp3js6fk10ok0:s6t1AcvLM7q9KL1w46MiVnyLIiN2rLI6@singapore-redis.render.com:6379'],
+            "hosts": [CHANNEL_REDIS],
         },
     },
 }
 
-SECRET_KEY = 'fz@z7-a=yvq!rvy+0#f(laxf@@z6-jgjh2wk$!+ydea2jk@)xz'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
+
+SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = False
 
-ALLOWED_HOSTS = [
-    'earnest-cassata-8f1bf8.netlify.app',
+ALLOWED_HOSTS = [] if DEBUG else [
     'quiz-game1.ru',
     '127.0.0.1',
     '62.113.104.181'
@@ -42,10 +57,10 @@ CRSF_COOKIE_SAMESITE = None
 # django-cors-headers
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    'https://earnest-cassata-8f1bf8.netlify.app',
+CORS_ALLOWED_ORIGINS = ['http://localhost:8080', 'http://localhost:8000'] if DEBUG else [
     'https://quiz-game1.ru',
     'http://127.0.0.1:8000',
+    'http://127.0.0.1:8000'
     'https://62.113.104.181'
 ]
 
@@ -74,7 +89,6 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -103,16 +117,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'quiz.wsgi.application'
 ASGI_APPLICATION = 'quiz.asgi.application'
 
-DATABASES = {
+DATABASES = (
+{
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+} if DEBUG else
+{
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'quiz',
         'USER': 'quizuser',
-        'PASSWORD': '123456',
+        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
         'HOST': 'localhost',
         'PORT': '5432'
     }
-}
+})
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -148,7 +169,7 @@ STATICFILES_DIRS = [BASE_DIR / '/static/']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CELERY_BROKER_URL = 'rediss://red-cf4lr59gp3js6fk10ok0:s6t1AcvLM7q9KL1w46MiVnyLIiN2rLI6@singapore-redis.render.com:6379'
+CELERY_BROKER_URL =  'redis://localhost:6379/0' if DEBUG else os.environ['CELERY_REDIS']
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']

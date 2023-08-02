@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import logging
 from datetime import datetime, date
 
 from django.db.models import QuerySet

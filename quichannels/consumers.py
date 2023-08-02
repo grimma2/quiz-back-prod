@@ -1,3 +1,5 @@
+from autologging import logged, traced
+
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import F
@@ -14,10 +16,14 @@ from game.models import Game
 import json
 
 
+
+@logged
+@traced
 class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer):
 
     def connect(self):
         self.code = self.scope['url_route']['kwargs']['code']
+        print(self.code)
         self.team = (
             Team.objects.filter(code=self.code).select_related('game').prefetch_related('game__question_set').first()
         )
@@ -103,6 +109,8 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
         }))
 
 
+@logged
+@traced
 class GameConsumer(UpdateLeaderBoardEvent, GroupMessageSender, WebsocketConsumer):
 
     def connect(self):
@@ -140,6 +148,8 @@ class GameConsumer(UpdateLeaderBoardEvent, GroupMessageSender, WebsocketConsumer
         }))
 
 
+@logged
+@traced
 class TimerConsumer(UpdateLeaderBoardEvent, NextQuestionSender, WebsocketConsumer):
 
     def connect(self):

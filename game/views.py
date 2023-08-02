@@ -1,4 +1,5 @@
-import logging
+from autologging import traced
+
 from datetime import datetime, date
 
 from django.db.models import QuerySet
@@ -15,6 +16,7 @@ from .utils import (
 )
 
 
+@traced
 class Games(APIView):
 
     @staticmethod
@@ -26,6 +28,7 @@ class Games(APIView):
         return Response(serializer.data)
 
 
+@traced
 class GameDetail(APIView):
 
     @staticmethod
@@ -34,6 +37,7 @@ class GameDetail(APIView):
         return Response(serializer.data)
 
 
+@traced
 class DeleteGameDetail(APIView):
 
     @staticmethod
@@ -44,6 +48,7 @@ class DeleteGameDetail(APIView):
         return Response(status=200)
 
 
+@traced
 class CreateGame(APIView):
 
     @staticmethod
@@ -56,6 +61,7 @@ class CreateGame(APIView):
         return Response(data={'pk': game.pk}, status=200)
 
 
+@traced
 class UpdateGame(APIView):
 
     @staticmethod
@@ -73,6 +79,7 @@ class UpdateGame(APIView):
         return Response(data={'pk': game.first().pk}, status=200)
 
 
+@traced
 class LeaderBoard(APIView):
 
     @staticmethod
@@ -82,6 +89,7 @@ class LeaderBoard(APIView):
         return Response(data=LeaderBoardFetcher(game=team.first().game).parse())
 
 
+@traced
 class QuestionTime(APIView):
 
     @staticmethod
@@ -93,21 +101,15 @@ class QuestionTime(APIView):
         return Response(data={'time': int(time.total_seconds())})
 
 
+@traced
 class GetGamesCookie(APIView):
 
     @staticmethod
     def post(request):
         if 'gamesPks' in request.COOKIES:
-            print(f"have gamesPks: {request.COOKIES['gamesPks']}")
+            print(request.COOKIES['gamesPks'])
             response = Response(data=request.COOKIES['gamesPks'])
         else:
-            print('not have cookies')
-            print(f'scheme: {request.scheme}')
-            print(f'is secure: {request.is_secure()}')
-            print(
-                f"host: {request.get_host()}, http_host: {request.META['HTTP_HOST']}, REMOTE_HOST: {request.META['REMOTE_HOST']}"
-            )
-            print(f'cookies: {request.COOKIES}')
             response = Response(data='[]')
             response.set_cookie(
                 'gamesPks',
@@ -119,12 +121,12 @@ class GetGamesCookie(APIView):
         return response
 
 
+@traced
 class SetGamesCookie(APIView):
 
     @staticmethod
     def post(request):
         response = Response()
-        print(f"set games cookie: {request.data['gamesPk']}")
         response.set_cookie(
             'gamesPks',
             request.data['gamesPks'],
