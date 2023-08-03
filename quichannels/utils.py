@@ -86,6 +86,8 @@ class GameTimersDependency:
     game: Game
 
     def set_timers(self):
+        # !FIXME получить первый вопрос, чтобы установить таймер,
+        # вместо того, чтобы брать время из инстанса игры
         ques_time = datetime.combine(date.min, self.game.question_time) - datetime.min
         for team in self.game.team_set.all():
             task = set_timer.apply_async(args=[ques_time.total_seconds(), team.code])
