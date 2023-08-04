@@ -1,17 +1,18 @@
+from typing import Any
+
 from dataclasses import dataclass
 from datetime import datetime, date
 
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from game.models import Game
 from game.utils import LeaderBoardFetcher
 from game.serializers import QuestionSerializer
 
 from .models import Team, CodeGenerator
 
 
-def update_team_codes(game: Game) -> QuerySet:
+def update_team_codes(game) -> QuerySet:
     for team in game.team_set.all():
         team.code = CodeGenerator.generate_code()
         team.save()
@@ -22,7 +23,7 @@ def update_team_codes(game: Game) -> QuerySet:
 @dataclass(kw_only=True)
 class TeamDataParser:
     team: Team
-    game: Game
+    game: Any
 
     def get_data(self) -> dict:
         if self.game.game_state == 'ON':
@@ -45,15 +46,15 @@ class TeamDataParser:
         if active_question:
             return {
                 'active_question': QuestionSerializer(active_question).data,
-                'timer': self._get_timer_value(),
+                'timer': self._get_timer_value(question=active_question),
                 'remain_answers': self.team.remain_answers if active_question.question_type == 'blitz' else None
             }
         else:
             fetcher = LeaderBoardFetcher(game=self.game)
             return {'leader_board': fetcher.parse()}
 
-    def _get_timer_value(self):
-        ques_time = datetime.combine(date.min, self.game.question_time) - datetime.min
+    def _get_timer_value(self, question):
+        ques_time = datetime.combine(date.min, question.time) - datetime.min
         time_passed = timezone.now() - self.team.timer.start_time
         timer_value = ques_time - time_passed
 

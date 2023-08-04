@@ -1,0 +1,2 @@
+class QuestionNotFound(Exception):
+    pass

@@ -1,5 +1,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+game/__pycache__/
+team/__pycache__/
+quiz/__pycache__/
+quichannels/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -103,6 +107,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.bat
 .venv
 env/
 venv/

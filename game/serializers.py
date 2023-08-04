@@ -16,7 +16,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('text', 'order', 'correct_answers', 'question_type', 'pk')
+        fields = ('text', 'order', 'correct_answers', 'question_type', 'time', 'pk')
 
 
 class GameDetailSerializer(serializers.ModelSerializer):
@@ -26,6 +26,5 @@ class GameDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = (
-            'name', 'question_time',
-            'game_state', 'question_set', 'team_set', 'pk'
+            'name', 'game_state', 'question_set', 'team_set', 'pk'
         )

@@ -3,6 +3,8 @@ from operator import itemgetter
 from typing import Any
 from datetime import time as datetime_time, timedelta
 
+from autologging import logged
+
 from django.db.models import Model, QuerySet
 
 from quiz.settings import SECONDS_FOR_SINGLE_POINT
@@ -27,9 +29,6 @@ def parse_time_field(time: str):
 
 
 def parse_non_foreign_key(fields: dict) -> dict:
-    # parse time field to datetime.time instance
-    fields['question_time'] = parse_time_field(fields['question_time'])
-
     return (
         {key: value for key, value in fields.items() if not isinstance(value, list)}
     )
@@ -60,6 +59,7 @@ def update_non_foreign_key(fields: dict, instance: QuerySet):
     instance.update(**parse_non_foreign_key(fields))
 
 
+@logged
 @dataclass(kw_only=True)
 class ForeignKeyUpdater:
     model: Model
@@ -78,9 +78,9 @@ class ForeignKeyUpdater:
         updated_pks = [instance['pk'] for instance in instances]
 
         for remain in self.game_manager.all():
-            if not remain.pk in updated_pks:
+            if not (remain.pk in updated_pks):
                 continue
-            print('delete ramain in loop')
+            print('delete remain in loop')
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]
 
             if self.model == Team:
@@ -88,11 +88,22 @@ class ForeignKeyUpdater:
             else:
                 delete_fields = []
 
+            update_fields = self.parse_fields(fields=update_fields)
+
             deleter = TemporaryDelete(work_object=update_fields, delete_fields=delete_fields)
             deleter.delete()
             self.model.objects.update_or_create(pk=remain.pk, defaults=deleter.work_object)
             deleter.recover()
             instances.remove(deleter.work_object)
+            
+    def parse_fields(self, fields: dict):
+        self.__log.debug(f'field time: {fields.get("time")}')
+        
+        if 'time' in fields.keys():
+            fields['time'] = parse_time_field(fields['time'])
+            
+        return fields
+        
 
 
 class LeaderBoardFetcher:

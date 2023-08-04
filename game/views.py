@@ -2,12 +2,13 @@ from autologging import traced
 
 from datetime import datetime, date
 
-from django.db.models import QuerySet
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from quiz.exceptions import QuestionNotFound
+
 from team.models import Team
+from team.utils import get_team_question
 
 from .serializers import GamesSerializer, GameDetailSerializer
 from .models import Game, Question
@@ -94,10 +95,19 @@ class QuestionTime(APIView):
 
     @staticmethod
     def post(request):
-        game = (
-            Team.objects.filter(code=request.data['code']).prefetch_related('game').first().game
+        team = (
+            Team.objects.filter(code=request.data['code']).prefetch_related('game').first()
         )
-        time = datetime.combine(date.min, game.question_time) - datetime.min
+        
+        question = get_team_question(
+            active_question_number=team.active_question,
+            questions=team.game.question_set.all()
+        )
+        
+        if question is None:
+            raise QuestionNotFound('not found during try to fetch `team.active_question`')
+        
+        time = datetime.combine(date.min, question.time) - datetime.min
         return Response(data={'time': int(time.total_seconds())})
 
 

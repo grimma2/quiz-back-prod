@@ -12,7 +12,6 @@ class Game(models.Model):
         OFF = 'OFF', _('Game is off')
 
     name = models.CharField('Имя', max_length=255)
-    question_time = models.TimeField('Время на один вопрос')
     game_state = models.CharField(
         max_length=3,
         choices=GameState.choices,
@@ -30,6 +29,7 @@ class Question(models.Model):
     text = models.TextField('Текст вопроса')
     order = models.PositiveSmallIntegerField(default=1)
     correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)
+    time = models.TimeField('Время на вопрос')
     question_type = models.CharField(
         'Тип вопроса',
         choices=QuestionType.choices,

@@ -88,7 +88,9 @@ class GameTimersDependency:
     def set_timers(self):
         # !FIXME получить первый вопрос, чтобы установить таймер,
         # вместо того, чтобы брать время из инстанса игры
-        ques_time = datetime.combine(date.min, self.game.question_time) - datetime.min
+        # was fixed теперь получаем первый вопрос игры и берём у него время
+        first_question = self.game.question_set.fisrt()
+        ques_time = datetime.combine(date.min, first_question.time) - datetime.min
         for team in self.game.team_set.all():
             task = set_timer.apply_async(args=[ques_time.total_seconds(), team.code])
             team.timer = Timer.objects.create(task_id=task.id)
@@ -137,9 +139,13 @@ class NextQuestionSender(GroupMessageSender):
                 team.save()
 
             # set new timer if new question has begun
+            '''
+            was changed from `question_time=team.game.question_time` to
+            `question_time=question.time
+            '''
             team.timer.restart(
                 code=team.code,
-                question_time=team.game.question_time
+                question_time=question.time
             )
             return QuestionSerializer(question).data
         else:
