@@ -11,13 +11,12 @@ from team.models import Team
 from team.utils import get_team_question
 
 from .serializers import GamesSerializer, GameDetailSerializer
-from .models import Game, Question
+from .models import Game, Question, Hint
 from .utils import (
     update_foreign_key, update_non_foreign_key, parse_non_foreign_key, LeaderBoardFetcher
 )
 
 
-@traced
 class Games(APIView):
 
     @staticmethod
@@ -29,7 +28,6 @@ class Games(APIView):
         return Response(serializer.data)
 
 
-@traced
 class GameDetail(APIView):
 
     @staticmethod
@@ -38,7 +36,6 @@ class GameDetail(APIView):
         return Response(serializer.data)
 
 
-@traced
 class DeleteGameDetail(APIView):
 
     @staticmethod
@@ -49,7 +46,6 @@ class DeleteGameDetail(APIView):
         return Response(status=200)
 
 
-@traced
 class CreateGame(APIView):
 
     @staticmethod
@@ -57,12 +53,19 @@ class CreateGame(APIView):
         game = Game.objects.create(**parse_non_foreign_key(request.data))
 
         update_foreign_key(Question, game, request.data['question_set'], game.question_set)
+
+        for question in request.data['question_set']:
+            model_question = Question.objects.get(pk=question['pk'])
+
+            update_foreign_key(
+                Hint, model_question, question['hints'], model_question.hints
+            )
+
         update_foreign_key(Team, game, request.data['team_set'], game.team_set)
 
         return Response(data={'pk': game.pk}, status=200)
 
 
-@traced
 class UpdateGame(APIView):
 
     @staticmethod
@@ -73,6 +76,14 @@ class UpdateGame(APIView):
         update_foreign_key(
             Question, game.first(), request.data['question_set'], game.first().question_set
         )
+
+        for question in request.data['question_set']:
+            model_question = Question.objects.get(pk=question['pk'])
+
+            update_foreign_key(
+                Hint, model_question, question['hints'], model_question.hints
+            )
+
         update_foreign_key(
             Team, game.first(), request.data['team_set'], game.first().team_set
         )
@@ -80,7 +91,6 @@ class UpdateGame(APIView):
         return Response(data={'pk': game.first().pk}, status=200)
 
 
-@traced
 class LeaderBoard(APIView):
 
     @staticmethod
@@ -90,7 +100,6 @@ class LeaderBoard(APIView):
         return Response(data=LeaderBoardFetcher(game=team.first().game).parse())
 
 
-@traced
 class QuestionTime(APIView):
 
     @staticmethod
@@ -111,7 +120,6 @@ class QuestionTime(APIView):
         return Response(data={'time': int(time.total_seconds())})
 
 
-@traced
 class GetGamesCookie(APIView):
 
     @staticmethod

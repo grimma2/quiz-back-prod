@@ -4,6 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import F
 
+from game.serializers import HintSerializer
+
 from .utils import (
     change_game_state, NextQuestionSender,
     GroupMessageSender, UpdateLeaderBoardEvent, code_is_valid
@@ -11,7 +13,7 @@ from .utils import (
 
 from team.models import Team
 
-from game.models import Game
+from game.models import Game, Hint
 
 import json
 
@@ -108,6 +110,12 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
             'event_data': event['event_data'],
         }))
 
+    def add_hint(self, event):
+        self.send(text_data=json.dumps({
+            'event': 'add_hint',
+            'event_data': event['event_data'],
+        }))
+
 
 @logged
 @traced
@@ -164,5 +172,29 @@ class TimerConsumer(UpdateLeaderBoardEvent, NextQuestionSender, WebsocketConsume
         except Exception as e:
             print(e)
         print('question was send')
+
+        self.close()
+
+
+class HintConsumer(WebsocketConsumer):
+
+    def connect(self):
+        print('hint connect...')
+        self.accept()
+
+    def receive(self, text_data):
+        try:
+            hint_pk, code = text_data.split(', ')
+            hint = Hint.objects.get(pk=hint_pk)
+
+            async_to_sync(self.channel_layer.group_send)(
+                f'{code}_team',
+                {
+                    'type': 'add_hint',
+                    'event_data': HintSerializer(hint).data
+                }
+            )
+        except Exception as e:
+            print(e)
 
         self.close()

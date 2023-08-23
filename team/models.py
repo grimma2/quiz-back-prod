@@ -33,14 +33,10 @@ class Timer(models.Model):
         AbortableAsyncResult(self.task_id, app=celery_app).abort()
         return super().delete(*args, **kwargs)
 
-    def restart(self, code, question_time) -> None:
+    def restart(self, question_time: int, code: str, hints: dict[int, int]) -> None:
         AbortableAsyncResult(self.task_id, app=celery_app).abort()
-        new_task = set_timer.apply_async(
-            args=[
-                (datetime.combine(date.min, question_time) - datetime.min).total_seconds(),
-                code
-            ]
-        )
+        
+        new_task = set_timer.apply_async(args=[question_time, code, hints])
 
         self.start_time = timezone.now()
         self.task_id = new_task.id

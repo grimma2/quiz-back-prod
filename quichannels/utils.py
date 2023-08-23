@@ -12,7 +12,7 @@ from .tasks import set_timer
 from team.models import Team, Timer
 from team.utils import get_team_question
 
-from game.models import Game, FinishTeam, LeaderBoard
+from game.models import Game, FinishTeam, LeaderBoard, Question
 from game.serializers import QuestionSerializer
 from game.utils import LeaderBoardFetcher
 
@@ -80,6 +80,20 @@ class GroupMessageSender:
                 f'{team.code}_team', send
             )
 
+# timer utils below
+def question_hints_for_timer(question: Question) -> dict[int, int]:
+    '''
+    question: question model
+    return: dict with keys as hint's pks what contain question's field `question.hints`
+            with m2m relation
+    '''
+    result = {}
+    for hint in question.hints.all():
+        hint_key = (datetime.combine(date.min, hint.appear_after) - datetime.min).total_seconds()
+        result[int(hint_key)] = int(hint.pk)
+        
+    return result
+
 
 @dataclass(kw_only=True)
 class GameTimersDependency:
@@ -89,21 +103,32 @@ class GameTimersDependency:
         # !FIXME получить первый вопрос, чтобы установить таймер,
         # вместо того, чтобы брать время из инстанса игры
         # was fixed теперь получаем первый вопрос игры и берём у него время
-        first_question = self.game.question_set.fisrt()
+        first_question = self.game.question_set.first()
         ques_time = datetime.combine(date.min, first_question.time) - datetime.min
         for team in self.game.team_set.all():
-            task = set_timer.apply_async(args=[ques_time.total_seconds(), team.code])
+            # run task with needed args
+            
+            print(f'run timer for {team.code}')
+            task = set_timer.apply_async(
+                args=[
+                    int(ques_time.total_seconds()), 
+                    team.code, 
+                    question_hints_for_timer(first_question)
+                ]
+            )
+            
+            # create new timer for watching when task was runned and save this changes in Team model
             team.timer = Timer.objects.create(task_id=task.id)
             team.save()
 
-    def revoke_timers(self):
-        for team in self.game.team_set.all():
-            print(f'{team.timer}')
-            if not team.timer:
-                return
-
-            team.timer.delete()
-
+    #def revoke_timers(self):
+    #    for team in self.game.team_set.all():
+    #        print(f'{team.timer}')
+    #        if not team.timer:
+    #            return
+    #
+    #        team.timer.delete()
+# end timer utils
 
 class NextQuestionSender(GroupMessageSender):
 
@@ -144,8 +169,9 @@ class NextQuestionSender(GroupMessageSender):
             `question_time=question.time
             '''
             team.timer.restart(
+                question_time=int((datetime.combine(date.min, question.time) - datetime.min).total_seconds()),
                 code=team.code,
-                question_time=question.time
+                hints=question_hints_for_timer(question)
             )
             return QuestionSerializer(question).data
         else:

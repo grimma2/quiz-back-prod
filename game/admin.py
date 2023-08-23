@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from .models import Game, Question, LeaderBoard, FinishTeam
+from .models import Game, Question, LeaderBoard, FinishTeam, Hint
+
+
+class HintAdmin(admin.ModelAdmin):
+    list_display = ('text', 'appear_after', 'pk')
+    list_display_links = ('text', 'pk')
 
 
 class GameAdmin(admin.ModelAdmin):
@@ -27,3 +32,4 @@ admin.site.register(Game, GameAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(LeaderBoard, LeaderBoardAdmin)
 admin.site.register(FinishTeam, FinishTeamAdmin)
+admin.site.register(Hint, HintAdmin)

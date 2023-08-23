@@ -19,6 +19,11 @@ class Game(models.Model):
     )
 
 
+class Hint(models.Model):
+    text = models.TextField('Текст подсказки')
+    appear_after = models.TimeField('Время появления подсказки')
+
+
 class Question(models.Model):
 
     class QuestionType(models.TextChoices):
@@ -26,6 +31,7 @@ class Question(models.Model):
         blitz = 'blitz', _('blitz type of question')
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    hints = models.ManyToManyField(Hint, blank=True)
     text = models.TextField('Текст вопроса')
     order = models.PositiveSmallIntegerField(default=1)
     correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)

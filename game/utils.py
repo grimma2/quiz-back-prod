@@ -8,7 +8,7 @@ from autologging import logged
 from django.db.models import Model, QuerySet
 
 from quiz.settings import SECONDS_FOR_SINGLE_POINT
-from .models import Game, LeaderBoard
+from .models import Game, LeaderBoard, Question, Hint
 
 
 def timedelta_to_str(time: timedelta):
@@ -24,7 +24,7 @@ def timedelta_to_str(time: timedelta):
 
 
 def parse_time_field(time: str):
-    minutes, seconds = map(int, time.split(':'))
+    minutes, seconds = map(int, time.split(':')[1:])
     return datetime_time(minute=minutes, second=seconds)
 
 
@@ -69,41 +69,58 @@ class ForeignKeyUpdater:
     def create_instances(self, instances: list[dict]) -> None:
         print(instances)
         for instance in instances:
-            print('create instance... unconverted', instance)
             instance.pop('pk')
-            self.model.objects.create(**instance, game=self.game)
+
+            if self.model == Hint:
+                hint = self.model.objects.create(**instance)
+                self.game.hints.add(hint)
+            elif self.model == Question:
+                hints = instance.pop('hints')
+                new_obj = self.model.objects.create(**instance, game=self.game)
+                instance['pk'] = new_obj.pk
+                instance['hints'] = hints
+            else:
+                self.model.objects.create(**instance, game=self.game)
 
     def update_instances(self, instances: list[dict]) -> None:
-        from team.models import Team
         updated_pks = [instance['pk'] for instance in instances]
 
         for remain in self.game_manager.all():
             if not (remain.pk in updated_pks):
+                # delete instances what was removed
+                self.game_manager.filter(pk=remain.pk).delete()
                 continue
             print('delete remain in loop')
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]
 
-            if self.model == Team:
+            if self.model.__class__.__name__ == 'Team':
                 delete_fields = ['code']
-            else:
+            elif self.model == Question:
+                delete_fields = ['hints']
+            else: 
                 delete_fields = []
 
             update_fields = self.parse_fields(fields=update_fields)
 
             deleter = TemporaryDelete(work_object=update_fields, delete_fields=delete_fields)
             deleter.delete()
-            self.model.objects.update_or_create(pk=remain.pk, defaults=deleter.work_object)
+            obj, _ = self.model.objects.update_or_create(pk=remain.pk, defaults=deleter.work_object)
+            self.add_hint(hint=obj)
             deleter.recover()
             instances.remove(deleter.work_object)
             
-    def parse_fields(self, fields: dict):
-        self.__log.debug(f'field time: {fields.get("time")}')
-        
+    def parse_fields(self, fields: dict):        
         if 'time' in fields.keys():
             fields['time'] = parse_time_field(fields['time'])
-            
+        elif 'appear_after' in fields.keys():
+            fields['appear_after'] = parse_time_field(fields['appear_after'])
+
         return fields
-        
+    
+    def add_hint(self, hint):
+        if type(self.game) == Question:
+            self.game.hints.add(hint)
+
 
 
 class LeaderBoardFetcher:
