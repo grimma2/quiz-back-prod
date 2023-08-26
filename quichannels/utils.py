@@ -59,8 +59,7 @@ def change_game_state(game: Game, state, revoke_timers=True) -> None:
     else:
         if (blitz_question := game.question_set.first()).question_type == 'blitz':
             set_remain_answers(blitz_question, game.team_set.all())
-        else:
-            print(blitz_question.question_type)
+
         dependency = GameTimersDependency(game=game)
         LeaderBoard.objects.create(game=game)
         dependency.set_timers()
@@ -104,14 +103,11 @@ class GameTimersDependency:
         # вместо того, чтобы брать время из инстанса игры
         # was fixed теперь получаем первый вопрос игры и берём у него время
         first_question = self.game.question_set.first()
-        ques_time = datetime.combine(date.min, first_question.time) - datetime.min
         for team in self.game.team_set.all():
             # run task with needed args
             
-            print(f'run timer for {team.code}')
             task = set_timer.apply_async(
                 args=[
-                    int(ques_time.total_seconds()), 
                     team.code, 
                     question_hints_for_timer(first_question)
                 ]
@@ -169,7 +165,6 @@ class NextQuestionSender(GroupMessageSender):
             `question_time=question.time
             '''
             team.timer.restart(
-                question_time=int((datetime.combine(date.min, question.time) - datetime.min).total_seconds()),
                 code=team.code,
                 hints=question_hints_for_timer(question)
             )

@@ -30,13 +30,19 @@ class Timer(models.Model):
     )
 
     def delete(self, *args, **kwargs):
-        AbortableAsyncResult(self.task_id, app=celery_app).abort()
+        try:
+            AbortableAsyncResult(self.task_id, app=celery_app).abort()
+        except Exception as e:
+            print(e)
         return super().delete(*args, **kwargs)
 
-    def restart(self, question_time: int, code: str, hints: dict[int, int]) -> None:
-        AbortableAsyncResult(self.task_id, app=celery_app).abort()
-        
-        new_task = set_timer.apply_async(args=[question_time, code, hints])
+    def restart(self, code: str, hints: dict[int, int]) -> None:
+        try:
+            AbortableAsyncResult(self.task_id, app=celery_app).abort()
+        except Exception as e:
+            print(e)
+
+        new_task = set_timer.apply_async(args=[code, hints])
 
         self.start_time = timezone.now()
         self.task_id = new_task.id

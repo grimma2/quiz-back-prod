@@ -11,7 +11,6 @@ urlpatterns = [
     path('update/', views.UpdateGame.as_view()),
 
     path('get/leader-board/', views.LeaderBoard.as_view()),
-    path('get/question-time/', views.QuestionTime.as_view()),
     path('get/games-cookie/', views.GetGamesCookie.as_view()),
 
     path('set/games-cookie/', views.SetGamesCookie.as_view()),

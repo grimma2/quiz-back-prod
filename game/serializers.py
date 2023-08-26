@@ -20,23 +20,16 @@ class HintSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Question
-        fields = ('text', 'order', 'correct_answers', 'question_type', 'time', 'pk')
-
-
-class QuestionSerializerWithHints(serializers.ModelSerializer):
     hints = HintSerializer(many=True)
 
     class Meta:
         model = Question
-        fields = ('text', 'order', 'correct_answers', 'question_type', 'hints', 'time', 'pk')
+        fields = ('text', 'order', 'correct_answers', 'question_type', 'hints', 'pk')
 
 
 class GameDetailSerializer(serializers.ModelSerializer):
     team_set = TeamSerializer(many=True)
-    question_set = QuestionSerializerWithHints(many=True)
+    question_set = QuestionSerializer(many=True)
 
     class Meta:
         model = Game

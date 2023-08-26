@@ -21,7 +21,10 @@ class Game(models.Model):
 
 class Hint(models.Model):
     text = models.TextField('Текст подсказки')
-    appear_after = models.TimeField('Время появления подсказки')
+    appear_after = models.TimeField('Время появления подсказки')#
+
+    class Meta:
+        ordering = ['appear_after']
 
 
 class Question(models.Model):
@@ -35,7 +38,6 @@ class Question(models.Model):
     text = models.TextField('Текст вопроса')
     order = models.PositiveSmallIntegerField(default=1)
     correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)
-    time = models.TimeField('Время на вопрос')
     question_type = models.CharField(
         'Тип вопроса',
         choices=QuestionType.choices,

@@ -50,7 +50,6 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
         self.team.refresh_from_db(fields=['timer'])
         if text_data_json['type'] == 'next_question':
             try:
-                print(f"bonus: {text_data_json['bonus_points']}")
                 self.send_to_next_question(self.team, text_data_json['bonus_points'])
             except Exception as e:
                 print(e)
@@ -154,26 +153,6 @@ class GameConsumer(UpdateLeaderBoardEvent, GroupMessageSender, WebsocketConsumer
             'event': 'change_state',
             'event_data': event['event_data'],
         }))
-
-
-@logged
-@traced
-class TimerConsumer(UpdateLeaderBoardEvent, NextQuestionSender, WebsocketConsumer):
-
-    def connect(self):
-        self.accept()
-
-    def receive(self, text_data):
-        print(f'{text_data=}')
-        team = Team.objects.get(code=text_data)
-        print(f'{team=}')
-        try:
-            self.send_to_next_question(team, bonus_points=0)
-        except Exception as e:
-            print(e)
-        print('question was send')
-
-        self.close()
 
 
 class HintConsumer(WebsocketConsumer):

@@ -100,26 +100,6 @@ class LeaderBoard(APIView):
         return Response(data=LeaderBoardFetcher(game=team.first().game).parse())
 
 
-class QuestionTime(APIView):
-
-    @staticmethod
-    def post(request):
-        team = (
-            Team.objects.filter(code=request.data['code']).prefetch_related('game').first()
-        )
-        
-        question = get_team_question(
-            active_question_number=team.active_question,
-            questions=team.game.question_set.all()
-        )
-        
-        if question is None:
-            raise QuestionNotFound('not found during try to fetch `team.active_question`')
-        
-        time = datetime.combine(date.min, question.time) - datetime.min
-        return Response(data={'time': int(time.total_seconds())})
-
-
 class GetGamesCookie(APIView):
 
     @staticmethod

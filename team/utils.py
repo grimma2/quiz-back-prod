@@ -3,6 +3,8 @@ from typing import Any
 from dataclasses import dataclass
 from datetime import datetime, date
 
+from autologging import logged
+
 from django.db.models import QuerySet
 from django.utils import timezone
 
@@ -21,17 +23,27 @@ def update_team_codes(game) -> QuerySet:
     return game.team_set
 
 
+@logged
 @dataclass(kw_only=True)
 class QuestionTimeUtils:
     question: Question
     team: Team
 
     def get_timer_value(self) -> int:
-        ques_time = datetime.combine(date.min, self.question.time) - datetime.min
-        time_passed = timezone.now() - self.team.timer.start_time
-        timer_value = ques_time - time_passed
+        time_passed = (datetime.min + (timezone.now() - self.team.timer.start_time)).time()
 
-        return int(timer_value.total_seconds())
+        self.__log.debug(f'hints: {self.question.hints.filter(appear_after__gt=time_passed)}')
+        if (hints := self.question.hints.filter(appear_after__gt=time_passed)):
+            hint_time = hints.first().appear_after
+
+            timer_value = (
+                (datetime.combine(date.min, hint_time) - datetime.min) -
+                (datetime.combine(date.min, time_passed) - datetime.min)
+            )
+
+            return int(timer_value.total_seconds())
+
+        return 0
 
     def get_active_hints(self):
         # get hints what already should appear
@@ -64,7 +76,7 @@ class TeamDataParser:
         active_question = get_team_question(self.team.active_question, questions)
 
         dependency = QuestionTimeUtils(team=self.team, question=active_question)
-        
+
         if active_question:
             return {
                 'active_question': QuestionSerializer(active_question).data,
