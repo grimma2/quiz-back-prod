@@ -4,7 +4,9 @@ from .models import Team, Timer
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('game', 'name', 'code', 'active_question', 'remain_answers', 'pk')
+    list_display = (
+        'game', 'name', 'code', 'active_question', 'question_ordering', 'remain_answers', 'pk'
+    )
     list_display_links = ('name', 'pk')
 
 

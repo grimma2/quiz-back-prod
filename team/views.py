@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .utils import update_team_codes, TeamDataParser
+from .utils import update_team_codes, TeamDataParser, get_team_question
 from .serializers import TeamSerializer
 from .models import Team
 
@@ -27,9 +27,7 @@ class ActiveQuestion(APIView):
             Team.objects.filter(code=request.data['code']).select_related('game').prefetch_related('game__question_set')
         )
 
-        print(team.first().game.question_set.all())
-        question = team.first().game.question_set.all()[team.first().active_question]
-        serializer = QuestionSerializer(question)
+        serializer = QuestionSerializer(get_team_question(team.first()))
 
         return Response(serializer.data)
 

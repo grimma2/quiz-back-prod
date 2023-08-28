@@ -59,6 +59,8 @@ class Team(models.Model):
         unique=True
     )
     active_question = models.PositiveSmallIntegerField('Номер активного вопроса', default=0)
+    # write signal for valifate this field
+    question_ordering = models.TextField('порядок вопросов', blank=True, null=True)
     timer = models.OneToOneField(
         Timer, on_delete=models.SET_NULL, related_name='team', blank=True, null=True
     )

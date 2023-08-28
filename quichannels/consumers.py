@@ -47,7 +47,7 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        self.team.refresh_from_db(fields=['timer'])
+        self.team.refresh_from_db()
         if text_data_json['type'] == 'next_question':
             try:
                 self.send_to_next_question(self.team, text_data_json['bonus_points'])
@@ -55,7 +55,7 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
                 print(e)
         elif text_data_json['type'] == 'decrement_remain_answers':
             try:
-                self.team.refresh_from_db()
+                # self.team.refresh_from_db()
                 print('decrement_remain_answers')
                 print(self.team.remain_answers)
                 for i, answer in enumerate(self.team.remain_answers):

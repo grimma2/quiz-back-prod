@@ -10,7 +10,7 @@ from django.db.models import F
 from .tasks import set_timer
 
 from team.models import Team, Timer
-from team.utils import get_team_question
+from team.utils import get_team_question, QuestionOrderDependency
 
 from game.models import Game, FinishTeam, LeaderBoard, Question
 from game.serializers import QuestionSerializer
@@ -18,19 +18,17 @@ from game.utils import LeaderBoardFetcher
 
 
 def set_remain_answers(question, teams):
-    print(f'{question.correct_answers=}')
     for team in teams:
         team.remain_answers = question.correct_answers
         team.save()
-        print(f'before refresh {team.remain_answers=}')
         team.refresh_from_db()
-        print(f'after refresh {team.remain_answers=}')
 
 
 def game_off_team_basics(game: Game, revoke_timers=True) -> None:
     for team in game.team_set.all():
         team.active_question = 0
         team.bonus_points = 0
+        team.question_ordering = ''
 
         if revoke_timers:
             if team.timer:
@@ -60,9 +58,13 @@ def change_game_state(game: Game, state, revoke_timers=True) -> None:
         if (blitz_question := game.question_set.first()).question_type == 'blitz':
             set_remain_answers(blitz_question, game.team_set.all())
 
-        dependency = GameTimersDependency(game=game)
+        timers_dependency = GameTimersDependency(game=game)
+        question_dependency = QuestionOrderDependency(game=game)
+
         LeaderBoard.objects.create(game=game)
-        dependency.set_timers()
+
+        timers_dependency.set_timers()
+        question_dependency.set_order_for_teams()
 
     game.game_state = state
     game.save()
@@ -144,15 +146,17 @@ class NextQuestionSender(GroupMessageSender):
         )
 
     def get_next_question(self, team: Team, bonus_points):
-        questions = team.game.question_set.all()
         # clear remain_answers field for previous question if it is blitz type
-        self._clear_current_question(get_team_question(team.active_question, questions), team)
+        self._clear_current_question(
+            get_team_question(team), team
+        )
+
         team.active_question = F('active_question') + 1
         team.bonus_points = F('bonus_points') + bonus_points
         team.save()
         team.refresh_from_db()
 
-        question = get_team_question(team.active_question, questions)
+        question = get_team_question(team)
 
         if question:
             if question.question_type == 'blitz':
