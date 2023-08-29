@@ -43,7 +43,7 @@ CHANNEL_LAYERS = {
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [] if DEBUG else [
     'quiz-game1.ru',
