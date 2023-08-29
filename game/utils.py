@@ -18,6 +18,12 @@ def timedelta_to_str(time: timedelta):
     hours = seconds // 3600
     minutes = seconds // 60 - hours * 60
     converted_seconds = seconds - (hours * 3600 + minutes * 60)
+
+    if converted_seconds < 10:
+        converted_seconds = f'0{converted_seconds}'
+    if minutes < 10:
+        minutes = f'0{minutes}'
+
     print(f'{minutes}:{converted_seconds}', f'{hours}')
 
     return f'{hours}:{minutes}:{converted_seconds}' if hours else f'{minutes}:{converted_seconds}'
