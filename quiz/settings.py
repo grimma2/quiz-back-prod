@@ -48,7 +48,7 @@ DEBUG = True
 ALLOWED_HOSTS = [] if DEBUG else [
     'quiz-game1.ru',
     '127.0.0.1',
-    '62.113.104.181'
+    '31.129.103.157'
 ]
 
 SESSION_COOKIE_SAMESITE = None
@@ -61,7 +61,7 @@ CORS_ALLOWED_ORIGINS = ['http://localhost:8080', 'http://localhost:8000'] if DEB
     'https://quiz-game1.ru',
     'http://127.0.0.1:8000',
     'http://127.0.0.1:8080',
-    'https://62.113.104.181',
+    'https://31.129.103.157',
 ]
 
 # end django-cors-headers
