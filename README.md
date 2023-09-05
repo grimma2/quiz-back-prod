@@ -34,17 +34,17 @@ Additionally, when someone answers a question, all users in the game are synchro
 
 
 **Страница списка игр (Games list page)**
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/1c43e873-d71e-46e0-98cd-1d0008c015ee" width="400px" height="200px" />
+<div>img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/1c43e873-d71e-46e0-98cd-1d0008c015ee" width="400px" height="200px" /></div>
 
 **Страница редактирования игры (Edit game page)**
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/d00eab14-7b99-428e-ac9d-6c66e6396108" width="400px" />
+<div><img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/d00eab14-7b99-428e-ac9d-6c66e6396108" width="400px" /></div>
 
 **Форма добавления подсказки и вопроса (Adding hint and question form)**
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/7af6d7cc-db93-4047-a22d-1b01db95c4e5" width="400px" />
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/ae31c481-0743-4e15-8e16-2292ed1616a0" width="400px" />
+<div><img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/7af6d7cc-db93-4047-a22d-1b01db95c4e5" width="400px" /></div>
+<div><img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/ae31c481-0743-4e15-8e16-2292ed1616a0" width="400px" /></div>
 
 **Страница игры (Game detail page)**
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/62e3367c-1570-4a02-9a44-82a028794ab6" width="400px" />
+<div><img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/62e3367c-1570-4a02-9a44-82a028794ab6" width="400px" /></div>
 
 
 
