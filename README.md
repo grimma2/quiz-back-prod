@@ -34,7 +34,7 @@ Additionally, when someone answers a question, all users in the game are synchro
 
 
 **Страница списка игр (Games list page)**
-<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/1c43e873-d71e-46e0-98cd-1d0008c015ee" width="400px" />
+<img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/1c43e873-d71e-46e0-98cd-1d0008c015ee" width="400px" height="200px" />
 
 **Страница редактирования игры (Edit game page)**
 <img src="https://github.com/grimma2/quiz-back-prod/assets/80467627/d00eab14-7b99-428e-ac9d-6c66e6396108" width="400px" />
