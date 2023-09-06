@@ -7,7 +7,9 @@
 
 Создать в репазитории виртуальное окружение и активировать его.
 Установить зависимости
-<code>pip install -r requirements.txt</code>
+'''shell
+pip install -r requirements.txt
+'''
 
 Создать файл <code>.env.bat</code> с переменными окружения - 
 
