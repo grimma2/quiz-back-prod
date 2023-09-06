@@ -33,14 +33,11 @@ def send_hint(code, hint_pk):
 def set_timer(self, code: str, hints: dict[str, int]):
     start_from = perf_counter()
     second = 1
-    print(hints)
 
     while True:
-        print(second)
         if self.is_aborted():
             return
         elif str(second) in hints:
-            print(f'send hint for {second}')
             hint_pk = hints.pop(str(second))
             send_hint.apply_async(kwargs={'code': code, 'hint_pk': hint_pk})
 

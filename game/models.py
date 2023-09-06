@@ -35,7 +35,8 @@ class Question(models.Model):
 
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     hints = models.ManyToManyField(Hint, blank=True)
-    text = models.TextField('Текст вопроса')
+    text = models.TextField('Текст вопроса', blank=True, null=True)
+    image = models.ImageField(upload_to='question/', blank=True, null=True)
     order = models.PositiveSmallIntegerField(default=1)
     correct_answers = models.JSONField('Правильные ответы на вопрос', default=list)
     question_type = models.CharField(

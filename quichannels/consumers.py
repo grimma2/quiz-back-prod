@@ -25,7 +25,6 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
 
     def connect(self):
         self.code = self.scope['url_route']['kwargs']['code']
-        print(self.code)
         self.team = (
             Team.objects.filter(code=self.code).select_related('game').prefetch_related('game__question_set').first()
         )
@@ -49,41 +48,28 @@ class TeamConsumer(NextQuestionSender, UpdateLeaderBoardEvent, WebsocketConsumer
         text_data_json = json.loads(text_data)
         self.team.refresh_from_db()
         if text_data_json['type'] == 'next_question':
-            try:
-                self.send_to_next_question(self.team, text_data_json['bonus_points'])
-            except Exception as e:
-                print(e)
+            self.send_to_next_question(self.team, text_data_json['bonus_points'])
         elif text_data_json['type'] == 'decrement_remain_answers':
-            try:
-                # self.team.refresh_from_db()
-                print('decrement_remain_answers')
-                print(self.team.remain_answers)
-                for i, answer in enumerate(self.team.remain_answers):
-                    if answer['text'] == text_data_json['answer_text']:
-                        del self.team.remain_answers[i]
-                    else:
-                        print(f"{answer['text']} !== {text_data_json['answer_text']}")
+            # self.team.refresh_from_db()
+            for i, answer in enumerate(self.team.remain_answers):
+                if answer['text'] == text_data_json['answer_text']:
+                    del self.team.remain_answers[i]
 
-                if self.team.remain_answers:
-                    print(f'{self.team.remain_answers=}')
-                    if text_data_json['bonus_points']:
-                        self.team.bonus_points = F('bonus_points') + text_data_json['bonus_points']
-                    self.team.save()
+            if self.team.remain_answers:
+                if text_data_json['bonus_points']:
+                    self.team.bonus_points = F('bonus_points') + text_data_json['bonus_points']
+                self.team.save()
 
-                    async_to_sync(self.channel_layer.group_send)(
-                        self.team_name,
-                        {
-                            'type': 'send_remain_answers',
-                            'event_data': self.team.remain_answers
-                        }
-                    )
+                async_to_sync(self.channel_layer.group_send)(
+                    self.team_name,
+                    {
+                        'type': 'send_remain_answers',
+                        'event_data': self.team.remain_answers
+                    }
+                )
 
-                    print('after send_remain_answers to all')
-                else:
-                    print(f'{self.team.remain_answers} after')
-                    self.send_to_next_question(self.team, text_data_json['bonus_points'])
-            except Exception as e:
-                print(e)
+            else:
+                self.send_to_next_question(self.team, text_data_json['bonus_points'])
 
     def next_question(self, event):
         self.send(text_data=json.dumps({
@@ -158,22 +144,18 @@ class GameConsumer(UpdateLeaderBoardEvent, GroupMessageSender, WebsocketConsumer
 class HintConsumer(WebsocketConsumer):
 
     def connect(self):
-        print('hint connect...')
         self.accept()
 
     def receive(self, text_data):
-        try:
-            hint_pk, code = text_data.split(', ')
-            hint = Hint.objects.get(pk=hint_pk)
+        hint_pk, code = text_data.split(', ')
+        hint = Hint.objects.get(pk=hint_pk)
 
-            async_to_sync(self.channel_layer.group_send)(
-                f'{code}_team',
-                {
-                    'type': 'add_hint',
-                    'event_data': HintSerializer(hint).data
-                }
-            )
-        except Exception as e:
-            print(e)
+        async_to_sync(self.channel_layer.group_send)(
+            f'{code}_team',
+            {
+                'type': 'add_hint',
+                'event_data': HintSerializer(hint).data
+            }
+        )
 
         self.close()

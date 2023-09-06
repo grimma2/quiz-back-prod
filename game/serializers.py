@@ -21,10 +21,11 @@ class HintSerializer(serializers.ModelSerializer):
 
 class QuestionSerializer(serializers.ModelSerializer):
     hints = HintSerializer(many=True)
+    image = serializers.ImageField(use_url=True)
 
     class Meta:
         model = Question
-        fields = ('text', 'order', 'correct_answers', 'question_type', 'hints', 'pk')
+        fields = ('text', 'order', 'correct_answers', 'question_type', 'image', 'hints', 'pk')
 
 
 class GameDetailSerializer(serializers.ModelSerializer):

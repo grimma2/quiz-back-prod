@@ -21,7 +21,6 @@ class Games(APIView):
 
     @staticmethod
     def post(request):
-        print(request.data['games'][0])
         queryset = Game.objects.filter(pk__in=request.data['games'])
         serializer = GamesSerializer(queryset, many=True)
 
@@ -70,6 +69,7 @@ class UpdateGame(APIView):
 
     @staticmethod
     def post(request):
+        print(request.data)
         game = Game.objects.filter(pk=request.data['pk'])
         update_non_foreign_key(request.data, game)
 
@@ -105,7 +105,6 @@ class GetGamesCookie(APIView):
     @staticmethod
     def post(request):
         if 'gamesPks' in request.COOKIES:
-            print(request.COOKIES['gamesPks'])
             response = Response(data=request.COOKIES['gamesPks'])
         else:
             response = Response(data='[]')

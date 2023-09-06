@@ -119,13 +119,6 @@ class GameTimersDependency:
             team.timer = Timer.objects.create(task_id=task.id)
             team.save()
 
-    #def revoke_timers(self):
-    #    for team in self.game.team_set.all():
-    #        print(f'{team.timer}')
-    #        if not team.timer:
-    #            return
-    #
-    #        team.timer.delete()
 # end timer utils
 
 class NextQuestionSender(GroupMessageSender):
@@ -186,10 +179,8 @@ class NextQuestionSender(GroupMessageSender):
         )
 
         if all_teams_finished(team.active_question, team.game):
-            print('all_teams_finished')
             # turn off game if all teams are finished
             change_game_state(team.game, state='OFF', revoke_timers=False)
-            print('before send')
             async_to_sync(self.channel_layer.group_send)(
                 f'{team.game.pk}_game',
                 {
@@ -211,7 +202,6 @@ class NextQuestionSender(GroupMessageSender):
     @staticmethod
     def _clear_current_question(question, team: Team):
         if question.question_type == 'blitz':
-            print('_clear_current_question...')
             team.remain_answers = None
 
 

@@ -13,18 +13,18 @@ from .models import Game, LeaderBoard, Question, Hint
 
 def timedelta_to_str(time: timedelta):
     seconds = int(time.total_seconds())
-    print(f'{seconds}')
     # 3600 seconds = 1 hour
     hours = seconds // 3600
     minutes = seconds // 60 - hours * 60
     converted_seconds = seconds - (hours * 3600 + minutes * 60)
 
     if converted_seconds < 10:
+        print(f'{converted_seconds=}')
         converted_seconds = f'0{converted_seconds}'
+        print(f'{converted_seconds=}')
     if minutes < 10:
         minutes = f'0{minutes}'
 
-    print(f'{minutes}:{converted_seconds}', f'{hours}')
 
     return f'{hours}:{minutes}:{converted_seconds}' if hours else f'{minutes}:{converted_seconds}'
 
@@ -73,7 +73,6 @@ class ForeignKeyUpdater:
     game_manager: Any
 
     def create_instances(self, instances: list[dict]) -> None:
-        print(instances)
         for instance in instances:
             instance.pop('pk')
 
@@ -96,7 +95,6 @@ class ForeignKeyUpdater:
                 # delete instances what was removed
                 self.game_manager.filter(pk=remain.pk).delete()
                 continue
-            print('delete remain in loop')
             update_fields = [instance for instance in instances if int(instance['pk']) == remain.pk][0]
 
             if self.model.__class__.__name__ == 'Team':
@@ -126,7 +124,6 @@ class ForeignKeyUpdater:
     def add_hint(self, hint):
         if type(self.game) == Question:
             self.game.hints.add(hint)
-
 
 
 class LeaderBoardFetcher:
@@ -178,7 +175,6 @@ class LeaderBoardFetcher:
 
             play_time = finish_team_date - finish_team.leader_board.start_time
 
-            print(f'play_time seconds: {play_time.total_seconds()}')
 
             teams.append(
                 {

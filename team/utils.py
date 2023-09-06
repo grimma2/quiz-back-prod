@@ -94,6 +94,7 @@ class TeamDataParser:
 def get_team_question(team: Team):
     try:
         questions = team.game.question_set.all()
+        print(team.question_ordering)
         team_question_ordering = list(map(int, team.question_ordering.split(',')))
         question = questions[team_question_ordering[team.active_question]]
     except IndexError:
@@ -127,8 +128,6 @@ class QuestionOrderDependency:
         for i, question_order in enumerate(sorted_orders):
             question_order = list(map(str, question_order))
             current_team = self.game.team_set.all()[i]
-
-            print(','.join(question_order))
 
             current_team.question_ordering = ','.join(question_order)
             current_team.save()
